@@ -159,38 +159,46 @@ const forgotPassword = async (payload: { email: string }) => {
   // console.log(resetPassLink);
 };
 
-const resetPassword = async(token: string, payload: {id: string, password: string}) => {
-    const userData = await prisma.user.findUniqueOrThrow({
-      where: {
-        id: payload.id,
-        status: UserStatus.ACTIVE
-      }
-    })
-    const isValidToken = jwtHelpers.verifyToken(token, config.jwt.reset_pass_secret as Secret)
-    // console.log(isValidToken)
-  
-    if(!isValidToken){
-      throw new AppError(StatusCodes.FORBIDDEN, "Access Denied. Sorry...")
-    }
-  
-    // hash pass
-    const hashedPassword: string = await bcrypt.hash(payload.password, config.bcrypt.salt_round)
-  
-    // update into db
-    await prisma.user.update({
-      where: {
-        id: userData.id
-      },
-      data: {
-        password: hashedPassword
-      }
-    })
+const resetPassword = async (
+  token: string,
+  payload: { id: string; newPassword: string }
+) => {
+  const userData = await prisma.user.findUniqueOrThrow({
+    where: {
+      id: payload.id,
+      status: UserStatus.ACTIVE,
+    },
+  });
+  const isValidToken = jwtHelpers.verifyToken(
+    token,
+    config.jwt.access_secret as Secret
+  );
+
+  if (!isValidToken) {
+    throw new AppError(StatusCodes.FORBIDDEN, "Access Denied. Sorry...");
   }
+
+  // hash pass
+  const hashedPassword: string = await bcrypt.hash(
+    payload.newPassword,
+    config.bcrypt.salt_round
+  );
+
+  // update into db
+  await prisma.user.update({
+    where: {
+      id: userData.id,
+    },
+    data: {
+      password: hashedPassword,
+    },
+  });
+};
 
 export const AuthService = {
   loginUser,
   refreshToken,
   changePassword,
   forgotPassword,
-  resetPassword
+  resetPassword,
 };

@@ -22,6 +22,9 @@ const createUser = async (req: Request): Promise<User> => {
     password: hashedPassword,
     role: UserRole.USER,
     photo: req.body.user.photo,
+    name: req.body.user.name,
+    contactNumber: req.body.user.contactNumber,
+    gender: req.body.user.gender
   };
 
   const result = await prisma.$transaction(async (tx) => {
