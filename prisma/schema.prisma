@@ -9,10 +9,11 @@ datasource db {
 
 model User {
   id                 String     @id @default(uuid())
-  name               String
+  name               String?
   email              String     @unique
   password           String
   needPasswordChange Boolean    @default(true)
+  contactNumber      String?
   role               UserRole
   gender             Gender?
   photo              String?
@@ -22,6 +23,8 @@ model User {
 
   @@map("users")
 }
+
+
 
 //---------------------- enum---------------------
 
