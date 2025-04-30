@@ -1,40 +1,49 @@
+import { Gender, UserRole, UserStatus } from "@prisma/client";
 import { z } from "zod";
+const UserRoleEnum = z.nativeEnum(UserRole);
+const UserStatusEnum = z.nativeEnum(UserStatus);
+const GenderEnum = z.nativeEnum(Gender);
 
 const createUser = z.object({
-    password: z.string({
-        required_error: "Password is required"
+  password: z.string({
+    required_error: "Password is required",
+  }),
+  user: z.object({
+    name: z.string({
+      required_error: "Name is required",
     }),
-    user: z.object({
-        name: z.string({
-            required_error: "Name is required"
-        }),
-        email: z.string({
-            required_error: "Email is required"
-        }),
-        contactNumber: z.string({
-            required_error: "Contact Number is required"
-        }).optional()
-    })
-})
+    email: z.string({
+      required_error: "Email is required",
+    }),
+    contactNumber: z.string().optional(),
+    role: UserRoleEnum,
+    gender: GenderEnum.optional(),
+    photo: z.string().optional(),
+    status: UserStatusEnum.optional(),
+  }),
+});
 
 const createAdmin = z.object({
-    password: z.string({
-        required_error: "Password is required"
+  password: z.string({
+    required_error: "Password is required",
+  }),
+  user: z.object({
+    name: z.string({
+      required_error: "Name is required",
     }),
-    admin: z.object({
-        name: z.string({
-            required_error: "Name is required"
-        }),
-        email: z.string({
-            required_error: "Email is required"
-        }),
-        contactNumber: z.string({
-            required_error: "Contact Number is required"
-        }).optional()
-    })
-})
+    email: z.string({
+      required_error: "Email is required",
+    }),
+    contactNumber: z.string().optional(),
+    role: UserRoleEnum,
+    gender: GenderEnum.optional(),
+    photo: z.string().optional(),
+    status: UserStatusEnum.optional(),
+  }),
+});
+
 
 export const UserValidation = {
-    createUser,
-    createAdmin
-}
+  createUser,
+  createAdmin
+};
