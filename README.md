@@ -31,7 +31,8 @@ A powerful backend API for Eventlyze, an event management platform that supports
 
 ```bash
 git clone https://github.com/rockyhaque/eventlyze-server
-
+```
+```
 cd eventlyze-server
 ```
 
@@ -45,7 +46,8 @@ npm install
 
 ```bash
 DATABASE_URL="postgresql://username:password@localhost:5432/eventlyze"
-
+```
+```
 PORT=5000
 ```
 
@@ -54,7 +56,8 @@ PORT=5000
 
 ```bash
 npx prisma migrate dev
-
+```
+```
 npx prisma generate
 ```
 
