@@ -2,51 +2,62 @@ import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 import { PaymentService } from "./payment.service";
+import { Request, Response } from "express";
 
 
+// const createPayment = catchAsync(async (req:Request, res:Response) => {
+    
+//     const result = await PaymentService.createpaymentBd(req.body)  ;
+//     sendResponse(res, {
+//         statusCode: StatusCodes.OK,
+//         success: true,
+//         message: "succesfully get payment",
+//         data:result,
+//       });
+    
+//   });
 
-const createpayment = catchAsync(async (req, res) => {
-    const result = await PaymentService.createpaymentBd()  ;
+
+const successfullypaid = catchAsync(async (req:Request, res:Response) => {
+    const {id} = req.params;
+    const result = await PaymentService.succfulpayment(id)  ;
+    res.redirect(301, result as string);
     
-    sendResponse(res, {
-      statusCode: StatusCodes.OK,
-      success: true,
-      message: "Logged in Successfull",
-      data: {},
-    });
   });
-const successfullypaid = catchAsync(async (req, res) => {
-    const result = await PaymentService.createpaymentBd()  ;
-    
-    sendResponse(res, {
-      statusCode: StatusCodes.OK,
-      success: true,
-      message: "Logged in Successfull",
-      data: {},
-    });
+
+
+const paymentFails = catchAsync(async (req:Request, res:Response) => {
+    const {id} = req.params;
+    const result = await PaymentService.failpayment(id)  ;
+    res.redirect(301, result as string);
   });
-const paymentFails = catchAsync(async (req, res) => {
-    const result = await PaymentService.createpaymentBd()  ;
-    
-    sendResponse(res, {
-      statusCode: StatusCodes.OK,
-      success: true,
-      message: "Logged in Successfull",
-      data: {},
-    });
+
+
+const paymentcancle = catchAsync(async (req:Request, res:Response) => {
+    const {id} = req.params;
+    const result = await PaymentService.canclepayment(id)  ;
+    res.redirect(301, result as string);
   });
-const paymentId = catchAsync(async (req, res) => {
-    const result = await PaymentService.createpaymentBd()  ;
-    
+
+
+const getpayment = catchAsync(async (req:Request, res:Response) => {
+    const {userId,eventId} = req.params;
+    const result = await PaymentService.getSinglePayment(userId,eventId)  ;
     sendResponse(res, {
-      statusCode: StatusCodes.OK,
-      success: true,
-      message: "Logged in Successfull",
-      data: {},
-    });
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: "succesfully get payment",
+        data:result,
+      });
+    
   });
 
   export const  PaymentController = {
-    createpayment
+    successfullypaid,
+    paymentFails,
+    paymentcancle,
+    getpayment,
+    // createPayment,
+    
   } 
   
