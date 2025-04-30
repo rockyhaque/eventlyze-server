@@ -185,10 +185,55 @@ const changeProfileStatus = async (id: string, status: UserRole) => {
   return updateUserStatus;
 };
 
+const updateMyProfile = async (user: TAuthUser, req: Request) => {
+  const userInfo = await prisma.user.findUniqueOrThrow({
+    where: {
+      email: user?.email,
+      status: UserStatus.ACTIVE,
+    },
+  });
+
+  // photo upload
+  const file = req.file as IFile;
+  if(file){
+    const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
+    req.body.photo = uploadToCloudinary?.secure_url
+  }
+
+  // According the role, data will update
+  let profileInfo;
+
+  if (userInfo?.role === UserRole.SUPER_ADMIN) {
+    profileInfo = await prisma.user.update({
+      where: {
+        email: userInfo.email,
+      },
+      data: req.body,
+    });
+  } else if (userInfo?.role === UserRole.ADMIN) {
+    profileInfo = await prisma.user.update({
+      where: {
+        email: userInfo.email,
+      },
+      data: req.body,
+    });
+  } else if (userInfo?.role === UserRole.USER) {
+    profileInfo = await prisma.user.update({
+      where: {
+        email: userInfo.email,
+      },
+      data: req.body,
+    });
+  } 
+
+  return { ...profileInfo };
+};
+
 export const UserService = {
   createUser,
   createAdmin,
   getAllUserFromDB,
   myProfile,
   changeProfileStatus,
+  updateMyProfile
 };
