@@ -130,48 +130,65 @@ const getAllUserFromDB = async (params: any, options: IPaginationOptions) => {
 };
 
 const myProfile = async (user: TAuthUser) => {
-    const userInfo = await prisma.user.findUnique({
+  const userInfo = await prisma.user.findUnique({
+    where: {
+      email: user?.email,
+      status: UserStatus.ACTIVE,
+    },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      needPasswordChange: true,
+      status: true,
+    },
+  });
+
+  let profileInfo;
+  if (userInfo?.role === UserRole.SUPER_ADMIN) {
+    profileInfo = await prisma.user.findUnique({
       where: {
-        email: user?.email,
-        status: UserStatus.ACTIVE,
-      },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        needPasswordChange: true,
-        status: true,
+        email: userInfo.email,
       },
     });
-  
-    let profileInfo;
-    if (userInfo?.role === UserRole.SUPER_ADMIN) {
-      profileInfo = await prisma.user.findUnique({
-        where: {
-          email: userInfo.email,
-        },
-      });
-    } else if (userInfo?.role === UserRole.ADMIN) {
-      profileInfo = await prisma.user.findUnique({
-        where: {
-          email: userInfo.email,
-        },
-      });
-    } else if (userInfo?.role === UserRole.USER) {
-      profileInfo = await prisma.user.findUnique({
-        where: {
-          email: userInfo.email,
-        },
-      });
-    } 
-    
-  
-    return { ...userInfo, ...profileInfo };
-  };
+  } else if (userInfo?.role === UserRole.ADMIN) {
+    profileInfo = await prisma.user.findUnique({
+      where: {
+        email: userInfo.email,
+      },
+    });
+  } else if (userInfo?.role === UserRole.USER) {
+    profileInfo = await prisma.user.findUnique({
+      where: {
+        email: userInfo.email,
+      },
+    });
+  }
+
+  return { ...userInfo, ...profileInfo };
+};
+
+const changeProfileStatus = async (id: string, status: UserRole) => {
+  prisma.user.findUniqueOrThrow({
+    where: {
+      id,
+    },
+  });
+
+  const updateUserStatus = await prisma.user.update({
+    where: {
+      id,
+    },
+    data: status,
+  });
+
+  return updateUserStatus;
+};
 
 export const UserService = {
   createUser,
   createAdmin,
   getAllUserFromDB,
-  myProfile
+  myProfile,
+  changeProfileStatus,
 };
