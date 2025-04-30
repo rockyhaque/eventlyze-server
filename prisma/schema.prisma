@@ -14,7 +14,7 @@ model User {
   password           String
   needPasswordChange Boolean    @default(true)
   contactNumber      String?
-  role               UserRole
+  role               UserRole? @default(USER)
   gender             Gender?
   photo              String?
   status             UserStatus @default(ACTIVE)
