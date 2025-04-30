@@ -6,3 +6,42 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id                 String     @id @default(uuid())
+  name               String?
+  email              String     @unique
+  password           String
+  needPasswordChange Boolean    @default(true)
+  contactNumber      String?
+  role               UserRole
+  gender             Gender?
+  photo              String?
+  status             UserStatus @default(ACTIVE)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  @@map("users")
+}
+
+
+
+//---------------------- enum---------------------
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  USER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+  DELETED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
