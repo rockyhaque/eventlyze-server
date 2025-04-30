@@ -2,11 +2,12 @@ import { Request } from "express";
 import { IFile } from "../../interfaces/file";
 import { fileUploader } from "../../../helpers/fileUploader";
 import bcrypt from "bcryptjs";
-import { Prisma, User, UserRole } from "@prisma/client";
+import { Prisma, User, UserRole, UserStatus } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 import { userSearchAbleFields } from "./user.constant";
+import { TAuthUser } from "../../interfaces/common";
 
 const createUser = async (req: Request): Promise<User> => {
   const file = req.file as IFile;
@@ -128,8 +129,49 @@ const getAllUserFromDB = async (params: any, options: IPaginationOptions) => {
   };
 };
 
+const myProfile = async (user: TAuthUser) => {
+    const userInfo = await prisma.user.findUnique({
+      where: {
+        email: user?.email,
+        status: UserStatus.ACTIVE,
+      },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        needPasswordChange: true,
+        status: true,
+      },
+    });
+  
+    let profileInfo;
+    if (userInfo?.role === UserRole.SUPER_ADMIN) {
+      profileInfo = await prisma.user.findUnique({
+        where: {
+          email: userInfo.email,
+        },
+      });
+    } else if (userInfo?.role === UserRole.ADMIN) {
+      profileInfo = await prisma.user.findUnique({
+        where: {
+          email: userInfo.email,
+        },
+      });
+    } else if (userInfo?.role === UserRole.USER) {
+      profileInfo = await prisma.user.findUnique({
+        where: {
+          email: userInfo.email,
+        },
+      });
+    } 
+    
+  
+    return { ...userInfo, ...profileInfo };
+  };
+
 export const UserService = {
   createUser,
   createAdmin,
-  getAllUserFromDB
+  getAllUserFromDB,
+  myProfile
 };

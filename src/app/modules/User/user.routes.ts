@@ -2,7 +2,21 @@ import express, { NextFunction, Request, Response } from "express";
 import { fileUploader } from "../../../helpers/fileUploader";
 import { UserValidation } from "./user.validation";
 import { UserController } from "./user.controller";
+import auth from "../../middlewares/auth";
+import { UserRole } from "@prisma/client";
 const router = express.Router();
+
+router.get(
+  "/",
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+  UserController.getAllUserFromDB
+);
+
+router.get(
+  "/me",
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.USER),
+  UserController.myProfile
+);
 
 router.post(
   "/create-user",
@@ -21,7 +35,5 @@ router.post(
     return UserController.createAdmin(req, res, next);
   }
 );
-
-
 
 export const UserRoutes = router;
