@@ -9,7 +9,6 @@ type Tpaymentpayload = {
     username: string;
     email: string;
     userId:string;
-
 }
 
 const store_id = config.SSLcommer_store_id;
