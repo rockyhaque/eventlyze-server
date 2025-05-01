@@ -6,6 +6,8 @@ A powerful backend API for Eventlyze, an event management platform that supports
 
 [View Documentation on Google Docs](https://docs.google.com/document/d/1f6UQgBlSqhzzRZYaLK6R0_hQVAHkPbuUWXwrNXMa3Rg/edit?usp=drive_link)
 
+#### Server Link➡️ https://eventlyze-server.vercel.app
+
 ## 🛠 Tech Stack
 
 - **Node.js** + **Express** – Backend Framework
