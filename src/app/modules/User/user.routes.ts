@@ -37,7 +37,7 @@ router.post(
 );
 
 router.patch(
-  "/:id/status",
+  "/status/:id",
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.USER),
   UserController.changeProfileStatus
 );

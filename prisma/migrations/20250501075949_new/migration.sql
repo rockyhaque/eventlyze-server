@@ -1,4 +1,13 @@
 -- CreateEnum
+CREATE TYPE "UserRole" AS ENUM ('SUPER_ADMIN', 'ADMIN', 'USER');
+
+-- CreateEnum
+CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'INACTIVE', 'BLOCKED', 'DELETED');
+
+-- CreateEnum
+CREATE TYPE "Gender" AS ENUM ('MALE', 'FEMALE');
+
+-- CreateEnum
 CREATE TYPE "EventStatus" AS ENUM ('UPCOMING', 'CANCELED', 'ONGOING', 'COMPLETED');
 
 -- CreateEnum
@@ -10,8 +19,24 @@ CREATE TYPE "ParticipantStatus" AS ENUM ('JOINED', 'REQUESTED', 'APPROVED', 'REJ
 -- CreateEnum
 CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'COMPLETED', 'FAILED');
 
--- AlterTable
-ALTER TABLE "users" ADD COLUMN     "reviewId" TEXT;
+-- CreateTable
+CREATE TABLE "users" (
+    "id" TEXT NOT NULL,
+    "name" TEXT,
+    "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "needPasswordChange" BOOLEAN NOT NULL DEFAULT true,
+    "contactNumber" TEXT,
+    "role" "UserRole" DEFAULT 'USER',
+    "gender" "Gender",
+    "photo" TEXT,
+    "status" "UserStatus" NOT NULL DEFAULT 'ACTIVE',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "reviewId" TEXT,
+
+    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "events" (
@@ -97,6 +122,9 @@ CREATE TABLE "_EventInvites" (
 
     CONSTRAINT "_EventInvites_AB_pkey" PRIMARY KEY ("A","B")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
 CREATE INDEX "_EventParticipants_B_index" ON "_EventParticipants"("B");
