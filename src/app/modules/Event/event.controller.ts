@@ -12,7 +12,6 @@ interface CustomRequest extends Request {
 
 const createEvent = catchAsync(async (req: CustomRequest, res) => {
     const result = await eventService.createEvent(req.body, req.user);
-    // 1. Extract email from user
     sendResponse(res, {
         statusCode: StatusCodes.OK,
         success: true,
