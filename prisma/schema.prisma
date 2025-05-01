@@ -62,6 +62,7 @@ enum EventType {
   OFFLINE
 }
 
+// event model
 model Event {
   id                String        @id @default(uuid())
   ownerId           String
@@ -98,6 +99,7 @@ enum ParticipantStatus {
   REJECTED
 }
 
+// participant model
 model Participant {
   id        String            @id @default(uuid())
   eventId   String
@@ -111,6 +113,7 @@ model Participant {
   @@map("participants")
 }
 
+// invite model
 model Invite {
   id       String   @id @default(uuid())
   eventId  String
@@ -127,6 +130,7 @@ enum PaymentStatus {
   FAILED
 }
 
+// payment model
 model Payment {
   id        String        @id @default(uuid())
   eventId   String
@@ -139,6 +143,7 @@ model Payment {
   Event     Event[]
 }
 
+// review model
 model Review {
   id        String   @id @default(uuid())
   eventId   String
