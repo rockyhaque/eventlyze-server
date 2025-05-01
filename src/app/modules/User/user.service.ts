@@ -188,6 +188,24 @@ const changeProfileStatus = async (id: string, status: UserRole) => {
   return updateUserStatus;
 };
 
+const updateRole = async (id: string, role: UserRole) => {
+
+  prisma.user.findUniqueOrThrow({
+    where: {
+      id,
+    },
+  });
+
+  const updateRole = await prisma.user.update({
+    where: {
+      id,
+    },
+    data: role,
+  });
+
+  return updateRole;
+};
+
 const updateMyProfile = async (user: TAuthUser, req: Request) => {
   const userInfo = await prisma.user.findUniqueOrThrow({
     where: {
@@ -238,5 +256,6 @@ export const UserService = {
   getAllUserFromDB,
   myProfile,
   changeProfileStatus,
+  updateRole,
   updateMyProfile
 };
