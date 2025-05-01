@@ -3,6 +3,7 @@ import { UserRoutes } from "../modules/User/user.routes";
 import { AuthRoutes } from "../modules/Auth/auth.routes";
 import { EventRoutes } from "../modules/Event/event.routes";
 import { PaymentRoutes } from "../modules/payment/payment.routes";
+import { adminRoutes } from "../modules/Admin/admin.routes";
 import { ReviewRoutes } from "../modules/Review/review.routes";
 
 
@@ -14,20 +15,25 @@ const moduleRoutes = [
     route: UserRoutes,
   },
   {
+    path: "/admin",
+    route: adminRoutes,
+  },
+  {
     path: "/auth",
     route: AuthRoutes,
   },
   {
     path: "/event",
     route: EventRoutes,
-
+  },
+  {
     path: "/payments",
     route: PaymentRoutes,
   },
   {
     path: "/reviews",
-    route:ReviewRoutes
-  }
+    route: ReviewRoutes,
+  },
 ];
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
