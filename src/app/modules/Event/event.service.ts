@@ -2,11 +2,24 @@ import { ICreateEventInput } from "./event.constant";
 
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const createEvent = async (data: ICreateEventInput, user: any) => {
+    // 1. Extract email from user
+    const email = user?.email;
 
-const createEvent = async (data: ICreateEventInput) => {
-    return await prisma.event.create({
+    // 2. Find the user by email
+    const existingUser = await prisma.user.findUnique({
+        where: { email },
+        select: { id: true },
+    });
+
+    // if (!existingUser) {
+    //     throw new ApiError(StatusCodes.NOT_FOUND, 'User not found');
+    // }
+
+    // 3. Inject ownerId into the event data
+    const event = await prisma.event.create({
         data: {
-            ownerId: data.ownerId,
+            ownerId: existingUser.id,
             title: data.title,
             description: data.description,
             isPublic: data.isPublic || false,
@@ -25,7 +38,10 @@ const createEvent = async (data: ICreateEventInput) => {
             reviewId: data.reviewId || null,
         },
     });
+
+    return event;
 };
+
 
 export const eventService = {
     createEvent,

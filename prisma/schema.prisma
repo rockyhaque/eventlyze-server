@@ -64,13 +64,13 @@ enum EventType {
 
 // event model
 model Event {
-  id                String        @id @default(uuid())
+  id                String      @id @default(uuid())
   ownerId           String
-  owner             User          @relation(fields: [ownerId], references: [id])
+  owner             User        @relation(fields: [ownerId], references: [id])
   title             String
   description       String
-  isPublic          Boolean       @default(false)
-  isPaid            Boolean       @default(false)
+  isPublic          Boolean     @default(false)
+  isPaid            Boolean     @default(false)
   price             Int
   category          String
   location          String?
@@ -79,16 +79,22 @@ model Event {
   eventStartTime    DateTime
   eventEndTime      DateTime
   seat              Int
-  participantIds    Participant[] @relation("EventParticipants")
-  inviteIds         Invite[]      @relation("EventInvites")
-  status            EventStatus   @default(UPCOMING)
-  eventType         EventType     @default(OFFLINE)
-  paymentId         String?
-  payment           Payment?      @relation(fields: [paymentId], references: [paymentId])
-  reviewId          String?
-  review            Review?       @relation(fields: [reviewId], references: [id])
-  Participant       Participant[]
-  Invite            Invite[]
+  status            EventStatus @default(UPCOMING)
+  eventType         EventType   @default(OFFLINE)
+
+  // Participants & Invites
+  participants Participant[] @relation("EventParticipants")
+  invites      Invite[]      @relation("EventInvites")
+
+  // Payment (optional)
+  paymentId String?
+  payment   Payment? @relation(fields: [paymentId], references: [paymentId])
+
+  // Review (optional)
+  reviewId    String?
+  review      Review?       @relation(fields: [reviewId], references: [id])
+  Participant Participant[]
+  Invite      Invite[]
 
   @@map("events")
 }
@@ -150,10 +156,10 @@ model Payment {
 
 // review model
 model Review {
-  id      String  @id @default(uuid())
-  eventId String
-  Event   Event[]
-  userId  String
+  id        String   @id @default(uuid())
+  eventId   String
+  Event     Event[]
+  userId    String
   User      User     @relation(fields: [id], references: [id])
   content   String
   rating    Int
