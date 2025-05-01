@@ -38,3 +38,10 @@ export interface ICreateEventInput {
     paymentId?: string | null;
     reviewId?: string | null;
 }
+export interface IFilterQuery {
+    isPublic?: string;
+    isPaid?: string;
+    status?: TEventStatus;
+    eventType?: TEventType;
+    category?: string;
+}

@@ -2,8 +2,8 @@
 import { StatusCodes } from "http-status-codes";
 import { Request } from "express";
 import sendResponse from "../../../shared/sendResponse";
-import { eventService } from "./event.service";
 import catchAsync from "../../../shared/catchAsync";
+import { eventService } from "./event.service";
 
 interface CustomRequest extends Request {
     user?: any;
@@ -21,6 +21,31 @@ const createEvent = catchAsync(async (req: CustomRequest, res) => {
 });
 
 
+
+
+
+
+// const getEvents = catchAsync(async (req: CustomRequest, res) => {
+//     const result = await eventService.getFilteredEvents(req.query); // ✅ access the method
+//     sendResponse(res, {
+//         statusCode: StatusCodes.OK,
+//         success: true,
+//         message: "Events retrieved successfully!",
+//         data: result,
+//     });
+// });
+const getEvents = catchAsync(async (req: CustomRequest, res) => {
+    const result = await eventService.getAllEvents.getFilteredEvents(req.query);
+    sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: "Events retrieved successfully!",
+        data: result,
+    });
+});
+
+
 export const eventController = {
     createEvent,
+    getEvents
 };

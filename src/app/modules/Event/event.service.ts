@@ -1,4 +1,4 @@
-import { ICreateEventInput } from "./event.constant";
+import { ICreateEventInput, IFilterQuery, TEVENT_STATUS, TEVENT_TYPE } from "./event.constant";
 
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
@@ -43,6 +43,49 @@ const createEvent = async (data: ICreateEventInput, user: any) => {
 };
 
 
+
+
+const parseBoolean = (value: string | undefined): boolean | undefined => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return undefined;
+};
+
+const getAllEvents = {
+    getFilteredEvents: async (query: IFilterQuery) => {
+        const { isPublic, isPaid, status, eventType, category } = query;
+
+        const filters: any = {};
+
+        const publicBool = parseBoolean(isPublic);
+        const paidBool = parseBoolean(isPaid);
+
+        if (publicBool !== undefined) filters.isPublic = publicBool;
+        if (paidBool !== undefined) filters.isPaid = paidBool;
+        if (status && TEVENT_STATUS[status]) filters.status = status;
+        if (eventType && TEVENT_TYPE[eventType]) filters.eventType = eventType;
+        if (category) filters.category = category;
+
+        const events = await prisma.event.findMany({
+            where: filters,
+            include: {
+                owner: true,
+                participants: true,
+                invites: true,
+                payment: true,
+                review: true,
+            },
+        });
+
+        return events;
+    },
+};
+
+
+
+
 export const eventService = {
     createEvent,
+    getAllEvents,
+
 };
