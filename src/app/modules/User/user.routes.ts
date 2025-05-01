@@ -43,6 +43,14 @@ router.patch(
 );
 
 router.patch(
+  "/update-role/:id",
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.USER),
+  UserController.updateRole
+);
+
+
+
+router.patch(
   "/update-my-profile",
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.USER),
   fileUploader.upload.single("file"),
