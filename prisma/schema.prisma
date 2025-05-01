@@ -29,7 +29,6 @@ model User {
   @@map("users")
 }
 
-
 //---------------------- enum---------------------
 
 enum UserRole {
@@ -155,4 +154,5 @@ model Review {
   rating    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
 }
