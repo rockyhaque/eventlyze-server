@@ -72,6 +72,8 @@ model Event {
   isPublic          Boolean       @default(false)
   isPaid            Boolean       @default(false)
   price             Int
+  category          String
+  location          String?
   registrationStart DateTime
   registrationEnd   DateTime
   eventStartTime    DateTime
