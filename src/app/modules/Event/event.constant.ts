@@ -25,6 +25,8 @@ export interface ICreateEventInput {
     description: string;
     isPublic?: boolean;
     isPaid?: boolean;
+    category: string;
+    location: string;
     price?: number;
     registrationStart: string | Date;
     registrationEnd: string | Date;

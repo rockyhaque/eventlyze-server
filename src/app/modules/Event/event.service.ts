@@ -12,6 +12,8 @@ const createEvent = async (data: ICreateEventInput) => {
             isPublic: data.isPublic || false,
             isPaid: data.isPaid || false,
             price: data.price || 0,
+            category: data.category,
+            location: data.location,
             registrationStart: new Date(data.registrationStart),
             registrationEnd: new Date(data.registrationEnd),
             eventStartTime: new Date(data.eventStartTime),
