@@ -8,35 +8,26 @@ datasource db {
 }
 
 model User {
-  id                 String     @id @default(uuid())
+  id                 String        @id @default(uuid())
   name               String?
-  email              String     @unique
+  email              String        @unique
   password           String
-  needPasswordChange Boolean    @default(true)
+  needPasswordChange Boolean       @default(true)
   contactNumber      String?
-  role               UserRole? @default(USER)
+  role               UserRole?     @default(USER)
   gender             Gender?
   photo              String?
-  status             UserStatus @default(ACTIVE)
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
+  status             UserStatus    @default(ACTIVE)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  Event              Event[]
+  Participant        Participant[]
+  Payment            Payment[]
+  Review             Review?       @relation(fields: [reviewId], references: [id])
+  reviewId           String?
 
   @@map("users")
 }
-
-model Payment {
-  paymentId String     @id
-  eventId String
-  userId String
-  amount Int
-  paymentUrl String
-  status  PaymentStatus @default(PENDING)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("payments")
-}
-
 
 
 //---------------------- enum---------------------
@@ -57,6 +48,113 @@ enum UserStatus {
 enum Gender {
   MALE
   FEMALE
+}
+
+//---------------------- enum for event----------------------
+enum EventStatus {
+  UPCOMING
+  CANCELED
+  ONGOING
+  COMPLETED
+}
+
+enum EventType {
+  ONLINE
+  OFFLINE
+}
+
+// event model
+model Event {
+  id                String        @id @default(uuid())
+  ownerId           String
+  owner             User          @relation(fields: [ownerId], references: [id])
+  title             String
+  description       String
+  isPublic          Boolean       @default(false)
+  isPaid            Boolean       @default(false)
+  price             Int
+  registrationStart DateTime
+  registrationEnd   DateTime
+  eventStartTime    DateTime
+  eventEndTime      DateTime
+  seat              Int
+  participantIds    Participant[] @relation("EventParticipants")
+  inviteIds         Invite[]      @relation("EventInvites")
+  status            EventStatus   @default(UPCOMING)
+  eventType         EventType     @default(OFFLINE)
+  paymentId         String?
+  payment           Payment?      @relation(fields: [paymentId], references: [id])
+  reviewId          String?
+  review            Review?       @relation(fields: [reviewId], references: [id])
+  Participant       Participant[]
+  Invite            Invite[]
+
+  @@map("events")
+}
+
+//---------------------- enum for participant----------------------
+enum ParticipantStatus {
+  JOINED
+  REQUESTED
+  APPROVED
+  REJECTED
+}
+
+// participant model
+model Participant {
+  id        String            @id @default(uuid())
+  eventId   String
+  events    Event[]           @relation("EventParticipants")
+  event     Event             @relation(fields: [eventId], references: [id])
+  userId    String
+  user      User              @relation(fields: [userId], references: [id])
+  status    ParticipantStatus @default(REQUESTED)
+  createdAt DateTime          @default(now())
+
+  @@map("participants")
+}
+
+// invite model
+model Invite {
+  id       String   @id @default(uuid())
+  eventId  String
+  event    Event    @relation(fields: [eventId], references: [id])
+  email    String
+  events   Event[]  @relation("EventInvites")
+  inviteId DateTime
+}
+
+//---------------------- enum for payment----------------------
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+// payment model
+model Payment {
+  id        String        @id @default(uuid())
+  eventId   String
+  userId    String?
+  User      User?         @relation(fields: [userId], references: [id])
+  status    PaymentStatus @default(PENDING)
+  amount    Int
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  Event     Event[]
+}
+
+// review model
+model Review {
+  id        String   @id @default(uuid())
+  eventId   String
+  Event     Event[]
+  userId    String
+  User      User[]
+  content   String
+  rating    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum PaymentStatus {
