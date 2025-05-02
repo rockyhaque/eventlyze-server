@@ -53,6 +53,7 @@ model Event {
   eventStartTime      DateTime
   eventEndTime        DateTime
   seat                Int
+  eventBanner             String?
   status              EventStatus @default(UPCOMING)
   eventType           EventType   @default(OFFLINE)
 
