@@ -2,6 +2,8 @@
 import { ParticipantStatus } from '@prisma/client';
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+
+
 const handleJoinRequest = async (userEmail: string, eventId: string) => {
     const user = await prisma.user.findUnique({ where: { email: userEmail } });
     if (!user) throw new Error('User not found');

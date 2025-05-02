@@ -89,6 +89,8 @@ model Event {
   review            Review?       @relation(fields: [reviewId], references: [id])
   Participant       Participant[]
   Invite            Invite[]
+  participantId     String?
+  inviteId          String?
 
   @@map("events")
 }
