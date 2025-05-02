@@ -99,6 +99,7 @@ CREATE TABLE "Invite" (
 -- CreateTable
 CREATE TABLE "Payment" (
     "paymentId" TEXT NOT NULL,
+    "eventId" TEXT NOT NULL,
     "userId" TEXT,
     "paymentUrl" TEXT NOT NULL,
     "status" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
