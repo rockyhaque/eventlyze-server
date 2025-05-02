@@ -58,6 +58,8 @@ CREATE TABLE "events" (
     "eventType" "EventType" NOT NULL DEFAULT 'OFFLINE',
     "paymentId" TEXT,
     "reviewId" TEXT,
+    "participantId" TEXT,
+    "inviteId" TEXT,
 
     CONSTRAINT "events_pkey" PRIMARY KEY ("id")
 );
