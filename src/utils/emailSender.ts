@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 import config from "../config";
 
-const emailSender = async (email: string, html: string) => {
+const emailSender = async (to: string, subject: string, text: string,  html: string) => {
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
@@ -12,11 +12,11 @@ const emailSender = async (email: string, html: string) => {
     },
   });
 
-  const info = await transporter.sendMail({
-    from: '"Eventlyze 👻" <rockyhaque99@gmail.com>',
-    to: email,
-    subject: "Reset Password Link",
-    text: "Hello world?",
+  await transporter.sendMail({
+    from: `"Eventlyze 👻" <${config.emailSender.email}>`,
+    to,
+    subject,
+    text,
     html,
   });
 

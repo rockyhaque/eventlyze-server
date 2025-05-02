@@ -49,6 +49,16 @@ enum Gender {
   FEMALE
 }
 
+// newsletter
+
+model NewsletterSubscriber {
+  id        String   @id @default(uuid())
+  email     String
+  createdAt DateTime @default(now())
+
+  @@map("subscribers")
+}
+
 //---------------------- enum for event----------------------
 enum EventStatus {
   UPCOMING
@@ -150,10 +160,10 @@ model Payment {
 
 // review model
 model Review {
-  id      String  @id @default(uuid())
-  eventId String
-  Event   Event[]
-  userId  String
+  id        String   @id @default(uuid())
+  eventId   String
+  Event     Event[]
+  userId    String
   User      User     @relation(fields: [id], references: [id])
   content   String
   rating    Int

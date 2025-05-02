@@ -8,6 +8,7 @@ export default {
   port: process.env.PORT,
   SSLcommer_store_id: process.env.SSLCOMMERZ_STORE_ID,
   SSLcommer_password: process.env.SSLCOMMERZ_PASSWORD,
+  CLIENT_URL: process.env.CLIENT_URL,
   BACKEND_URL: process.env.BACKEND_URL,
   jwt: {
     access_secret: process.env.JWT_ACCESS_SECRET,
