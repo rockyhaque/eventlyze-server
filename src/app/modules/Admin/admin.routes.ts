@@ -5,6 +5,8 @@ import { AdminController } from "./admin.controller";
 
 const router = express.Router();
 
+router.get("/stats", auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.USER), AdminController.getAdminStats)
+
 router.delete(
   "/permanent-delete/:id",
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
