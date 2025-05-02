@@ -8,22 +8,23 @@ datasource db {
 }
 
 model User {
-  id                 String        @id @default(uuid())
+  id                 String         @id @default(uuid())
   name               String?
-  email              String        @unique
+  email              String         @unique
   password           String
-  needPasswordChange Boolean       @default(true)
+  needPasswordChange Boolean        @default(true)
   contactNumber      String?
-  role               UserRole?     @default(USER)
+  role               UserRole?      @default(USER)
   gender             Gender?
   photo              String?
-  status             UserStatus    @default(ACTIVE)
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
+  status             UserStatus     @default(ACTIVE)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
   Event              Event[]
   Participant        Participant[]
   Payment            Payment[]
   Review             Review[]
+  Notification       Notification[]
 
   @@map("users")
 }
@@ -56,13 +57,10 @@ model Event {
   status              EventStatus @default(UPCOMING)
   eventType           EventType   @default(OFFLINE)
 
-
-
   paymentId String?
   reviewId  String?
   ownerId   String
 
-  
   participant Participant[]
 
   invite  Invite   @relation(fields: [id], references: [id])
@@ -73,7 +71,6 @@ model Event {
   @@map("events")
 }
 
-
 model Participant {
   id        String            @id @default(uuid())
   eventId   String
@@ -81,21 +78,17 @@ model Participant {
   status    ParticipantStatus @default(REQUESTED)
   createdAt DateTime          @default(now())
 
-  event     Event             @relation(fields: [eventId], references: [id])
-  user      User              @relation(fields: [userId], references: [id])
-  
+  event Event @relation(fields: [eventId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
   @@map("participants")
 }
 
-
 model Invite {
-  id       String   @id @default(uuid())
-  email    String  
-  event   Event[]
-
+  id    String  @id @default(uuid())
+  email String
+  event Event[]
 }
-
-
 
 // payment model
 model Payment {
@@ -108,7 +101,7 @@ model Payment {
   updatedAt  DateTime      @updatedAt
   event      Event[]
 
-  user       User?         @relation(fields: [userId], references: [id])
+  user User? @relation(fields: [userId], references: [id])
 }
 
 // review model
@@ -119,6 +112,17 @@ model Review {
   user      User     @relation(fields: [id], references: [id])
   content   String
   rating    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  eventId   String
+  message   String
+  read      Boolean
+  user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
