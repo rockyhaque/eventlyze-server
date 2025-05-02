@@ -103,6 +103,13 @@ const updateSingleEvent = async (id: string, data: ICreateEventInput) => {
     return event;
 };
 
+const deleteSingleEvent = async (id: string) => {
+    const event = await prisma.event.delete({
+        where: { id },
+    });
+    return event;
+};
+
 
 
 export const eventService = {
@@ -110,5 +117,6 @@ export const eventService = {
     getAllEvents,
     getEventById,
     updateSingleEvent,
+    deleteSingleEvent,
 
 };

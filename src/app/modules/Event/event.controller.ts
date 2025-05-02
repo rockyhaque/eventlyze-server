@@ -55,10 +55,22 @@ const updateSingleEvent = catchAsync(async (req: CustomRequest, res) => {
     });
 });
 
+const deleteSingleEvent = catchAsync(async (req: CustomRequest, res) => {
+    const { id } = req.params;
+    const result = await eventService.deleteSingleEvent(id);
+    sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: "Event deleted successfully!",
+        data: result,
+    });
+});
+
 
 export const eventController = {
     createEvent,
     getEvents,
     getEventById,
     updateSingleEvent,
+    deleteSingleEvent,
 };

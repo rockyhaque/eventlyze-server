@@ -11,6 +11,6 @@ router.post('/', auth(UserRole.USER), eventController.createEvent);
 router.get('/', eventController.getEvents);
 router.get('/:id', eventController.getEventById);
 router.put('/:id', auth(UserRole.USER), eventController.updateSingleEvent); // Assuming this is for updating the event
-// router.delete('/:id', auth(UserRole.USER), eventController.createEvent); // Assuming this is for deleting the event
+router.delete('/:id', auth(UserRole.USER), eventController.deleteSingleEvent); // Assuming this is for deleting the event
 
 export const EventRoutes = router;
