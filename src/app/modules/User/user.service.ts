@@ -1,6 +1,4 @@
 import { Request } from "express";
-import { IFile } from "../../interfaces/file";
-import { fileUploader } from "../../../helpers/fileUploader";
 import bcrypt from "bcryptjs";
 import { Prisma, User, UserRole, UserStatus } from "@prisma/client";
 import prisma from "../../../shared/prisma";
@@ -10,21 +8,15 @@ import { userSearchAbleFields } from "./user.constant";
 import { TAuthUser } from "../../interfaces/common";
 
 const createUser = async (req: Request): Promise<User> => {
-  const file = req.file as IFile;
-  if (file) {
-    const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
-    req.body.user.photo = uploadToCloudinary?.secure_url;
-  }
-
   const hashedPassword: string = await bcrypt.hash(req.body.password, 12);
   const userData = {
-    email: req.body.user.email,
+    email: req.body.email,
     password: hashedPassword,
     role: UserRole.USER,
-    photo: req.body.user.photo,
-    name: req.body.user.name,
-    contactNumber: req.body.user.contactNumber,
-    gender: req.body.user.gender
+    photo: req.body.photo,
+    name: req.body.name,
+    contactNumber: req.body.contactNumber,
+    gender: req.body.gender,
   };
 
   const result = await prisma.$transaction(async (tx) => {
@@ -43,18 +35,12 @@ const createUser = async (req: Request): Promise<User> => {
 };
 
 const createAdmin = async (req: Request) => {
-  const file = req.file as IFile;
-  if (file) {
-    const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
-    req.body.admin.photo = uploadToCloudinary?.secure_url;
-  }
-
   const hashedPassword: string = await bcrypt.hash(req.body.password, 12);
   const userData = {
-    email: req.body.admin.email,
+    email: req.body.email,
     password: hashedPassword,
     role: UserRole.ADMIN,
-    photo: req.body.admin.photo,
+    photo: req.body.photo,
   };
 
   const result = await prisma.$transaction(async (tx) => {
@@ -189,7 +175,6 @@ const changeProfileStatus = async (id: string, status: UserRole) => {
 };
 
 const updateRole = async (id: string, role: UserRole) => {
-
   prisma.user.findUniqueOrThrow({
     where: {
       id,
@@ -214,12 +199,6 @@ const updateMyProfile = async (user: TAuthUser, req: Request) => {
     },
   });
 
-  // photo upload
-  const file = req.file as IFile;
-  if(file){
-    const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
-    req.body.photo = uploadToCloudinary?.secure_url
-  }
 
   // According the role, data will update
   let profileInfo;
@@ -245,7 +224,7 @@ const updateMyProfile = async (user: TAuthUser, req: Request) => {
       },
       data: req.body,
     });
-  } 
+  }
 
   return { ...profileInfo };
 };
@@ -257,5 +236,5 @@ export const UserService = {
   myProfile,
   changeProfileStatus,
   updateRole,
-  updateMyProfile
+  updateMyProfile,
 };

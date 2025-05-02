@@ -5,10 +5,10 @@ const UserStatusEnum = z.nativeEnum(UserStatus);
 const GenderEnum = z.nativeEnum(Gender);
 
 const createUser = z.object({
-  password: z.string({
-    required_error: "Password is required",
-  }),
-  user: z.object({
+  body: z.object({
+    password: z.string({
+      required_error: "Password is required",
+    }),
     name: z.string({
       required_error: "Name is required",
     }),
@@ -24,10 +24,10 @@ const createUser = z.object({
 });
 
 const createAdmin = z.object({
-  password: z.string({
-    required_error: "Password is required",
-  }),
-  user: z.object({
+  body: z.object({
+    password: z.string({
+      required_error: "Password is required",
+    }),
     name: z.string({
       required_error: "Name is required",
     }),
@@ -35,15 +35,14 @@ const createAdmin = z.object({
       required_error: "Email is required",
     }),
     contactNumber: z.string().optional(),
-    role: UserRoleEnum,
+    role: UserRoleEnum.optional(),
     gender: GenderEnum.optional(),
     photo: z.string().optional(),
     status: UserStatusEnum.optional(),
   }),
 });
 
-
 export const UserValidation = {
   createUser,
-  createAdmin
+  createAdmin,
 };
