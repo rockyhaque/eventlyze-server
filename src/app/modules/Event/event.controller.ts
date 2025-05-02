@@ -44,9 +44,21 @@ const getEventById = catchAsync(async (req: CustomRequest, res) => {
     });
 });
 
+const updateSingleEvent = catchAsync(async (req: CustomRequest, res) => {
+    const { id } = req.params;
+    const result = await eventService.updateSingleEvent(id, req.body);
+    sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: "Event updated successfully!",
+        data: result,
+    });
+});
+
 
 export const eventController = {
     createEvent,
     getEvents,
     getEventById,
+    updateSingleEvent,
 };

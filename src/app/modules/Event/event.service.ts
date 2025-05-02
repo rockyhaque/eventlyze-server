@@ -95,11 +95,20 @@ const getEventById = async (id: string) => {
     return event;
 };
 
+const updateSingleEvent = async (id: string, data: ICreateEventInput) => {
+    const event = await prisma.event.update({
+        where: { id },
+        data,
+    });
+    return event;
+};
+
 
 
 export const eventService = {
     createEvent,
     getAllEvents,
     getEventById,
+    updateSingleEvent,
 
 };
