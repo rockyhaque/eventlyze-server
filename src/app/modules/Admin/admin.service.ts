@@ -1,6 +1,16 @@
 import { User, UserStatus } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 
+const getAdminStats = async (user: any) => {
+  
+  const userData = await prisma.user.findUniqueOrThrow({
+    where: {
+      email: user.email,
+    },
+  });
+  console.log("user", userData)
+}
+
 const permanentDeleteUser = async (id: string): Promise<User | null> => {
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
@@ -17,7 +27,6 @@ const permanentDeleteUser = async (id: string): Promise<User | null> => {
 
   return result;
 };
-
 
 const softUserDelete = async (id: string): Promise<User | null> => {
   const userData = await prisma.user.findUniqueOrThrow({
@@ -40,6 +49,7 @@ const softUserDelete = async (id: string): Promise<User | null> => {
 };
 
 export const AdminService = {
+  getAdminStats,
   softUserDelete,
   permanentDeleteUser
 };
