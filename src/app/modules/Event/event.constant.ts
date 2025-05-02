@@ -25,6 +25,8 @@ export interface ICreateEventInput {
     description: string;
     isPublic?: boolean;
     isPaid?: boolean;
+    category: string;
+    location: string;
     price?: number;
     registrationStart: string | Date;
     registrationEnd: string | Date;
@@ -35,4 +37,11 @@ export interface ICreateEventInput {
     eventType?: TEventType;
     paymentId?: string | null;
     reviewId?: string | null;
+}
+export interface IFilterQuery {
+    isPublic?: string;
+    isPaid?: string;
+    status?: TEventStatus;
+    eventType?: TEventType;
+    category?: string;
 }

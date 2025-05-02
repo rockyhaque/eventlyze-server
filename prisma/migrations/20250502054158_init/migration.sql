@@ -17,7 +17,7 @@ CREATE TYPE "EventType" AS ENUM ('ONLINE', 'OFFLINE');
 CREATE TYPE "ParticipantStatus" AS ENUM ('JOINED', 'REQUESTED', 'APPROVED', 'REJECTED');
 
 -- CreateEnum
-CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'COMPLETED', 'FAILED');
+CREATE TYPE "PaymentStatus" AS ENUM ('SUCCESS', 'CANCELLED', 'PENDING', 'COMPLETED', 'FAILED');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -47,6 +47,8 @@ CREATE TABLE "events" (
     "isPublic" BOOLEAN NOT NULL DEFAULT false,
     "isPaid" BOOLEAN NOT NULL DEFAULT false,
     "price" INTEGER NOT NULL,
+    "category" TEXT NOT NULL,
+    "location" TEXT,
     "registrationStart" TIMESTAMP(3) NOT NULL,
     "registrationEnd" TIMESTAMP(3) NOT NULL,
     "eventStartTime" TIMESTAMP(3) NOT NULL,
@@ -56,6 +58,8 @@ CREATE TABLE "events" (
     "eventType" "EventType" NOT NULL DEFAULT 'OFFLINE',
     "paymentId" TEXT,
     "reviewId" TEXT,
+    "participantId" TEXT,
+    "inviteId" TEXT,
 
     CONSTRAINT "events_pkey" PRIMARY KEY ("id")
 );
@@ -83,15 +87,16 @@ CREATE TABLE "Invite" (
 
 -- CreateTable
 CREATE TABLE "Payment" (
-    "id" TEXT NOT NULL,
+    "paymentId" TEXT NOT NULL,
     "eventId" TEXT NOT NULL,
     "userId" TEXT,
+    "paymentUrl" TEXT NOT NULL,
     "status" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
     "amount" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Payment_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Payment_pkey" PRIMARY KEY ("paymentId")
 );
 
 -- CreateTable
@@ -133,13 +138,10 @@ CREATE INDEX "_EventParticipants_B_index" ON "_EventParticipants"("B");
 CREATE INDEX "_EventInvites_B_index" ON "_EventInvites"("B");
 
 -- AddForeignKey
-ALTER TABLE "users" ADD CONSTRAINT "users_reviewId_fkey" FOREIGN KEY ("reviewId") REFERENCES "Review"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "events" ADD CONSTRAINT "events_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "events" ADD CONSTRAINT "events_paymentId_fkey" FOREIGN KEY ("paymentId") REFERENCES "Payment"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "events" ADD CONSTRAINT "events_paymentId_fkey" FOREIGN KEY ("paymentId") REFERENCES "Payment"("paymentId") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "events" ADD CONSTRAINT "events_reviewId_fkey" FOREIGN KEY ("reviewId") REFERENCES "Review"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -155,6 +157,9 @@ ALTER TABLE "Invite" ADD CONSTRAINT "Invite_eventId_fkey" FOREIGN KEY ("eventId"
 
 -- AddForeignKey
 ALTER TABLE "Payment" ADD CONSTRAINT "Payment_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Review" ADD CONSTRAINT "Review_id_fkey" FOREIGN KEY ("id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_EventParticipants" ADD CONSTRAINT "_EventParticipants_A_fkey" FOREIGN KEY ("A") REFERENCES "events"("id") ON DELETE CASCADE ON UPDATE CASCADE;
