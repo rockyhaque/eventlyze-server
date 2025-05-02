@@ -3,6 +3,12 @@ import AppError from "../../errors/AppError";
 import { StatusCodes } from "http-status-codes";
 import emailSender from "../../../utils/emailSender";
 import config from "../../../config";
+import prisma from "../../../shared/prisma";
+
+const getAllSubscriber = async() => {
+  const allSubscribers = await prisma.newsletterSubscriber.findMany()
+  return allSubscribers
+}
 
 const createSubscriber = async (req: Request) => {
   const { email } = req.body;
@@ -10,6 +16,10 @@ const createSubscriber = async (req: Request) => {
   if (!email) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Email is required");
   }
+
+  await prisma.newsletterSubscriber.create({
+    data: {email}
+  })
 
   const htmlContent = `
   <div style="background-color:#1a001f; padding: 40px 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #f4f4f4;">
@@ -53,5 +63,6 @@ const createSubscriber = async (req: Request) => {
 };
 
 export const SubscriberService = {
+  getAllSubscriber,
   createSubscriber,
 };
