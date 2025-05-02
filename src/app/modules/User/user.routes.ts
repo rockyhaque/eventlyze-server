@@ -5,7 +5,7 @@ import { UserController } from "./user.controller";
 import auth from "../../middlewares/auth";
 import { UserRole } from "@prisma/client";
 const router = express.Router();
-
+// demo
 router.get(
   "/all-users",
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
