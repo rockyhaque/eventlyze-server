@@ -136,24 +136,44 @@ const forgotPassword = async (payload: { email: string }) => {
   const resetPassLink =
     config.reset_pass_link + `?userId=${userData.id}&token=${resetPassToken}`;
 
-  await emailSender(
-    userData.email,
-    `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #f9f9f9; border-radius: 10px; border: 1px solid #e0e0e0;">
-      <h2 style="color: #2d3748;">🔐 Password Reset Request</h2>
-      <p style="color: #4a5568; font-size: 16px;">Hello <strong>${"User"}</strong>,</p>
-      <p style="color: #4a5568; font-size: 15px;">We received a request to reset your password. Click the button below to set a new one:</p>
+  const htmlContent = `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; padding: 30px; background-color: #1f1b2e; border-radius: 12px; border: 1px solid #3d2f59; color: #e0e0f0;">
+      <h2 style="color: #d6b1ff; text-align: center;">🔐 Password Reset Request</h2>
+      <p style="font-size: 16px; margin-bottom: 20px;">Hello <strong>${
+        userData.name || "User"
+      }</strong>,</p>
+      <p style="font-size: 15px; line-height: 1.6;">
+        We received a request to reset your password. To proceed, please click the button below:
+      </p>
+
       <div style="text-align: center; margin: 30px 0;">
         <a href="${resetPassLink}" style="text-decoration: none;">
-          <button style="background-color: #4f46e5; color: white; padding: 12px 25px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">
+          <button style="background-color: #8a4fff; color: #ffffff; padding: 14px 28px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
             Reset Password
           </button>
         </a>
       </div>
-      <p style="color: #718096; font-size: 14px;">If you didn’t request this, you can safely ignore this email.</p>
-      <p style="color: #718096; font-size: 14px;">Regards,<br><strong>Eventlyze Team</strong></p>
+
+      <p style="font-size: 14px; color: #c2b8e3;">
+        If you didn’t request this, you can safely ignore this email.
+      </p>
+
+      <hr style="border: none; border-top: 1px solid #3d2f59; margin: 30px 0;" />
+
+      <p style="font-size: 14px; text-align: center;">
+        Need help? Contact us at <a href="${
+          config.CLIENT_URL
+        }/contact" style="color: #a472f4; text-decoration: underline;">support</a><br/>
+        <strong>— The Eventlyze Team</strong>
+      </p>
     </div>
-    `
+`;
+
+  await emailSender(
+    userData.email,
+    "Password Reset Request",
+    "Click the link to reset your password",
+    htmlContent
   );
 
   // console.log(resetPassLink);
