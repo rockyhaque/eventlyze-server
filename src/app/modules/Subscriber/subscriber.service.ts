@@ -1,14 +1,33 @@
+
+
 import { Request } from "express";
 import AppError from "../../errors/AppError";
 import { StatusCodes } from "http-status-codes";
 import emailSender from "../../../utils/emailSender";
 import config from "../../../config";
+import prisma from "../../../shared/prisma";
 
 const createSubscriber = async (req: Request) => {
   const { email } = req.body;
 
   if (!email) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Email is required");
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Please provide a valid email address");
+  }
+
+  const existingSubscriber = await prisma.newsletterSubscriber.findFirst({
+    where: { email }
+  });
+
+  if (existingSubscriber) {
+    throw new AppError(
+      StatusCodes.CONFLICT,
+      "This email is already subscribed to our newsletter"
+    );
   }
 
   const htmlContent = `
@@ -18,7 +37,8 @@ const createSubscriber = async (req: Request) => {
         <td style="padding: 30px; text-align: center;">
           <h1 style="color: #e0aaff; font-size: 28px; margin-bottom: 20px;">🎉 Welcome to <span style="color:#ffffff;">Eventlyze</span>!</h1>
           <p style="font-size: 16px; line-height: 1.6; color: #dddddd;">
-            Thank you for subscribing to our newsletter. We're thrilled to have you with us! Get ready to receive the latest updates, event inspirations, and exclusive offers straight to your inbox.
+            Thank you for subscribing to our newsletter. We're thrilled to have you with us! 
+            Get ready to receive the latest updates, event inspirations, and exclusive offers straight to your inbox.
           </p>
           <div style="margin-top: 30px;">
             <a href="${config.CLIENT_URL}" target="_blank" style="padding: 12px 24px; background-color: #8000ff; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: bold;">
@@ -36,20 +56,22 @@ const createSubscriber = async (req: Request) => {
       </tr>
     </table>
   </div>
-`;
+  `;
 
   const textContent = "Thank you for subscribing! We will keep you updated.";
 
+  await prisma.newsletterSubscriber.create({
+    data: { email }
+  });
+
   try {
     await emailSender(email, "Welcome to Eventlyze!", textContent, htmlContent);
-  } catch (error) {
-    throw new AppError(
-      StatusCodes.INTERNAL_SERVER_ERROR,
-      "Failed to send confirmation email"
-    );
+  } catch (emailError) {
+    console.error("Email sending failed but subscriber created:", emailError);
   }
 
   return { message: "Subscription successful! Check your email." };
+
 };
 
 export const SubscriberService = {
