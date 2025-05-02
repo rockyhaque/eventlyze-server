@@ -24,9 +24,103 @@ model User {
   Participant        Participant[]
   Payment            Payment[]
   Review             Review[]
-  reviewId           String?
 
   @@map("users")
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(uuid())
+  email     String
+  createdAt DateTime @default(now())
+
+  @@map("subscribers")
+}
+
+model Event {
+  id                  String      @id @default(uuid())
+  title               String
+  description         String
+  isPublic            Boolean     @default(false)
+  isPaid              Boolean     @default(false)
+  price               Int
+  category            String
+  location            String?
+  platform            String?
+  meetingLink         String?
+  meetingLinkPassword String?
+  registrationStart   DateTime
+  registrationEnd     DateTime
+  eventStartTime      DateTime
+  eventEndTime        DateTime
+  seat                Int
+  status              EventStatus @default(UPCOMING)
+  eventType           EventType   @default(OFFLINE)
+
+
+
+  paymentId String?
+  reviewId  String?
+  ownerId   String
+
+  
+  participant Participant[]
+
+  invite  Invite   @relation(fields: [id], references: [id])
+  owner   User     @relation(fields: [ownerId], references: [id])
+  payment Payment? @relation(fields: [paymentId], references: [paymentId])
+  review  Review?  @relation(fields: [reviewId], references: [id])
+
+  @@map("events")
+}
+
+
+model Participant {
+  id        String            @id @default(uuid())
+  eventId   String
+  userId    String
+  status    ParticipantStatus @default(REQUESTED)
+  createdAt DateTime          @default(now())
+
+  event     Event             @relation(fields: [eventId], references: [id])
+  user      User              @relation(fields: [userId], references: [id])
+  
+  @@map("participants")
+}
+
+
+model Invite {
+  id       String   @id @default(uuid())
+  email    String  
+  event   Event[]
+
+}
+
+
+
+// payment model
+model Payment {
+  paymentId  String        @id
+  userId     String?
+  paymentUrl String
+  status     PaymentStatus @default(PENDING)
+  amount     Int
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  event      Event[]
+
+  user       User?         @relation(fields: [userId], references: [id])
+}
+
+// review model
+model Review {
+  id        String   @id @default(uuid())
+  event     Event[]
+  userId    String
+  user      User     @relation(fields: [id], references: [id])
+  content   String
+  rating    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 //---------------------- enum---------------------
@@ -49,16 +143,6 @@ enum Gender {
   FEMALE
 }
 
-// newsletter
-
-model NewsletterSubscriber {
-  id        String   @id @default(uuid())
-  email     String
-  createdAt DateTime @default(now())
-
-  @@map("subscribers")
-}
-
 //---------------------- enum for event----------------------
 enum EventStatus {
   UPCOMING
@@ -72,40 +156,6 @@ enum EventType {
   OFFLINE
 }
 
-// event model
-model Event {
-  id                String        @id @default(uuid())
-  ownerId           String
-  owner             User          @relation(fields: [ownerId], references: [id])
-  title             String
-  description       String
-  isPublic          Boolean       @default(false)
-  isPaid            Boolean       @default(false)
-  price             Int
-  category          String
-  location          String?
-  registrationStart DateTime
-  registrationEnd   DateTime
-  eventStartTime    DateTime
-  eventEndTime      DateTime
-  seat              Int
-  participantIds    Participant[] @relation("EventParticipants")
-  inviteIds         Invite[]      @relation("EventInvites")
-  status            EventStatus   @default(UPCOMING)
-  eventType         EventType     @default(OFFLINE)
-  paymentId         String?
-  payment           Payment?      @relation(fields: [paymentId], references: [paymentId])
-  reviewId          String?
-  review            Review?       @relation(fields: [reviewId], references: [id])
-  Participant       Participant[]
-  Invite            Invite[]
-  participantId     String?
-  inviteId          String?
-
-  @@map("events")
-}
-
-//---------------------- enum for participant----------------------
 enum ParticipantStatus {
   JOINED
   REQUESTED
@@ -113,62 +163,10 @@ enum ParticipantStatus {
   REJECTED
 }
 
-// participant model
-model Participant {
-  id        String            @id @default(uuid())
-  eventId   String
-  events    Event[]           @relation("EventParticipants")
-  event     Event             @relation(fields: [eventId], references: [id])
-  userId    String
-  user      User              @relation(fields: [userId], references: [id])
-  status    ParticipantStatus @default(REQUESTED)
-  createdAt DateTime          @default(now())
-
-  @@map("participants")
-}
-
-// invite model
-model Invite {
-  id       String   @id @default(uuid())
-  eventId  String
-  event    Event    @relation(fields: [eventId], references: [id])
-  email    String
-  events   Event[]  @relation("EventInvites")
-  inviteId DateTime
-}
-
-//---------------------- enum for payment----------------------
 enum PaymentStatus {
   SUCCESS
   CANCELLED
   PENDING
   COMPLETED
   FAILED
-}
-
-// payment model
-model Payment {
-  paymentId  String        @id
-  eventId    String
-  userId     String?
-  paymentUrl String
-  User       User?         @relation(fields: [userId], references: [id])
-  status     PaymentStatus @default(PENDING)
-  amount     Int
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
-  Event      Event[]
-}
-
-// review model
-model Review {
-  id        String   @id @default(uuid())
-  eventId   String
-  Event     Event[]
-  userId    String
-  User      User     @relation(fields: [id], references: [id])
-  content   String
-  rating    Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
