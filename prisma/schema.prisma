@@ -49,6 +49,16 @@ enum Gender {
   FEMALE
 }
 
+// newsletter
+
+model NewsletterSubscriber {
+  id        String   @id @default(uuid())
+  email     String
+  createdAt DateTime @default(now())
+
+  @@map("subscribers")
+}
+
 //---------------------- enum for event----------------------
 enum EventStatus {
   UPCOMING
