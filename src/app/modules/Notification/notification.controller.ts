@@ -14,7 +14,8 @@ const addNotification = catchAsync(async (req: Request, res: Response): Promise<
     sendResponse(res, {
         statusCode: StatusCodes.CREATED,
         success: true,
-        message: result.message,
+        // message: result.message,
+        message: "Notification send succesfully",
         data: result,
     });
 }

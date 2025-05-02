@@ -4,11 +4,15 @@
 const addNotificationIntoDB = async () => {
 
 
-    const result = await prisma.specialties.create({
+    // const result = await prisma.specialties.create({
         
-    });
+    // });
 
-    return result;
+    console.log("notification");
+    
+
+    // return result;
+    return null
 };
 
 
