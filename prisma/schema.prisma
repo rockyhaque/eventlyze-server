@@ -56,17 +56,20 @@ model Event {
   eventBanner             String?
   status              EventStatus @default(UPCOMING)
   eventType           EventType   @default(OFFLINE)
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
 
 
 
   paymentId String?
   reviewId  String?
   ownerId   String
+  inviteId            String?
+ 
 
-  
   participant Participant[]
 
-  invite  Invite   @relation(fields: [id], references: [id])
+   invite              Invite?     @relation(fields: [inviteId], references: [id])
   owner   User     @relation(fields: [ownerId], references: [id])
   payment Payment? @relation(fields: [paymentId], references: [paymentId])
   review  Review?  @relation(fields: [reviewId], references: [id])
