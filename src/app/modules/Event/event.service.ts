@@ -81,11 +81,25 @@ const getAllEvents = {
     },
 };
 
+const getEventById = async (id: string) => {
+    const event = await prisma.event.findUnique({
+        where: { id },
+        include: {
+            owner: true,
+            participants: true,
+            invites: true,
+            payment: true,
+            review: true,
+        },
+    });
+    return event;
+};
 
 
 
 export const eventService = {
     createEvent,
     getAllEvents,
+    getEventById,
 
 };

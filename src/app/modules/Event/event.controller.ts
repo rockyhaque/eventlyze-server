@@ -22,18 +22,6 @@ const createEvent = catchAsync(async (req: CustomRequest, res) => {
 
 
 
-
-
-
-// const getEvents = catchAsync(async (req: CustomRequest, res) => {
-//     const result = await eventService.getFilteredEvents(req.query); // ✅ access the method
-//     sendResponse(res, {
-//         statusCode: StatusCodes.OK,
-//         success: true,
-//         message: "Events retrieved successfully!",
-//         data: result,
-//     });
-// });
 const getEvents = catchAsync(async (req: CustomRequest, res) => {
     const result = await eventService.getAllEvents.getFilteredEvents(req.query);
     sendResponse(res, {
@@ -45,7 +33,20 @@ const getEvents = catchAsync(async (req: CustomRequest, res) => {
 });
 
 
+const getEventById = catchAsync(async (req: CustomRequest, res) => {
+    const { id } = req.params;
+    const result = await eventService.getEventById(id);
+    sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: "Event retrieved successfully!",
+        data: result,
+    });
+});
+
+
 export const eventController = {
     createEvent,
-    getEvents
+    getEvents,
+    getEventById,
 };
