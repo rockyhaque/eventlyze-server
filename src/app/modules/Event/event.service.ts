@@ -5,6 +5,7 @@ import AppError from "../../errors/AppError";
 import { run } from "node:test";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 import { eventSearchAbleFields } from "./event.constant";
+import { PaymentService, Tpaymentpayload } from "../payment/payment.service";
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
@@ -21,15 +22,30 @@ const createEvent = async (data:Event, user:JwtPayload) => {
     if (!existingUser) {
         throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
     }
-    
-    const event = await prisma.event.create({
-        data: {
-            ...data,
-            ownerId: existingUser.id,
-        },
-    })
 
-    return event;
+    const result = await prisma.$transaction(async (transactionclient:Prisma.TransactionClient) => {
+        const event = await transactionclient.event.create({
+            data: {
+                ...data,
+                ownerId: existingUser.id,
+            },
+        });
+      const paymentData:Tpaymentpayload = {
+        price: event.price,
+        eventId: event.id,
+        username:existingUser.name,
+        email:existingUser.email,
+        userId:existingUser.id
+        
+      } 
+      const newpayment =  PaymentService.createpaymentBd(paymentData,transactionclient)
+
+        return { event, newpayment};
+    })
+    
+    
+
+    return result;
 };
 
 
