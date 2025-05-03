@@ -5,12 +5,19 @@ import { UserRole } from "@prisma/client";
 
 const router = express.Router();
 
-router.get("/",auth(UserRole.USER), ReviewController.getReviewsByUserId);
+// get All Review For Admin
+router.get("/", auth(UserRole.ADMIN), ReviewController.getAllReviewForAdmin);
 
-router.post("/",auth(UserRole.USER), ReviewController.createReview);
+router.get("/", auth(UserRole.USER), ReviewController.getReviewsByUserId);
 
-router.put("/:reviewId",auth(UserRole.USER), ReviewController.updateReview);
+router.post("/", auth(UserRole.USER), ReviewController.createReview);
 
-router.delete("/:reviewId", ReviewController.deleteReview);
+router.put("/:reviewId", auth(UserRole.USER), ReviewController.updateReview);
+
+router.delete(
+  "/:reviewId",
+  auth(UserRole.ADMIN),
+  ReviewController.deleteReview
+);
 
 export const ReviewRoutes = router;
