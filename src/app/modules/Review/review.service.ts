@@ -49,6 +49,51 @@ const createReview = async (payload: any, user: JwtPayload) => {
   return review;
 };
 
+// get all for admin
+const getAllReviewForAdmin = async (user: JwtPayload) => {
+  const email = user?.email;
+
+  const existingUser = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true, role: true },
+  });
+
+  if (!existingUser) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
+
+  if (existingUser.role !== "ADMIN") {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      "Only admin can view all reviews"
+    );
+  }
+
+  const allReviews = await prisma.review.findMany({
+    include: {
+      event: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+        },
+      },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return allReviews;
+};
+
 const getReviewsByUserId = async (user: JwtPayload) => {
   const email = user?.email;
 
@@ -77,18 +122,84 @@ const getReviewsByUserId = async (user: JwtPayload) => {
   return reviews;
 };
 
-const updateReview = async (reviewId: string, payload: any) => {
-  console.log({ reviewId });
-  console.log({ payload });
+const updateReview = async (
+  reviewId: string,
+  payload: any,
+  user: JwtPayload
+) => {
+  const email = user?.email;
+
+  const existingUser = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true },
+  });
+
+  if (!existingUser) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
+
+  const existingReview = await prisma.review.findUnique({
+    where: { id: reviewId },
+  });
+
+  if (!existingReview) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Review not found");
+  }
+
+  if (existingReview.userId !== existingUser.id) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      "You can only update your own review"
+    );
+  }
+
+  const updateReview = await prisma.review.update({
+    where: {
+      id: existingReview.id,
+    },
+    data: {
+      content: payload.content,
+      rating: payload.rating,
+      updatedAt: new Date(),
+    },
+  });
+
+  return updateReview;
 };
 
-const deleteReview = async (reviewId: string) => {
-  console.log({ reviewId });
+const deleteReview = async (reviewId: string, user: JwtPayload) => {
+  const email = user?.email;
+
+  const existingUser = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true, role: true },
+  });
+
+  if (!existingUser) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
+
+  if (existingUser.role !== "ADMIN") {
+    throw new AppError(StatusCodes.FORBIDDEN, "Only admin can delete a review");
+  }
+
+  const existingReview = await prisma.review.findUnique({
+    where: { id: reviewId },
+  });
+
+  if (!existingReview) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Review not found");
+  }
+
+  await prisma.review.delete({
+    where: { id: reviewId },
+  });
 };
 
 export const ReviewService = {
   createReview,
   getReviewsByUserId,
+  getAllReviewForAdmin,
   updateReview,
   deleteReview,
 };

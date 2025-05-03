@@ -19,21 +19,37 @@ const createReview = catchAsync(async (req: CustomRequest, res: Response) => {
   });
 });
 
-const getReviewsByUserId = catchAsync(async (req: CustomRequest, res: Response) => {
-  const result = await ReviewService.getReviewsByUserId(req.user);
+const getReviewsByUserId = catchAsync(
+  async (req: CustomRequest, res: Response) => {
+    const result = await ReviewService.getReviewsByUserId(req.user);
 
-  sendResponse(res, {
-    statusCode: StatusCodes.OK,
-    success: true,
-    message: "Reviews retrieved successfully.",
-    data: result,
-  });
-});
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "Reviews retrieved successfully.",
+      data: result,
+    });
+  }
+);
 
-const updateReview = catchAsync(async (req, res) => {
+// get all reviews for admin
+const getAllReviewForAdmin = catchAsync(
+  async (req: CustomRequest, res: Response) => {
+    const result = await ReviewService.getAllReviewForAdmin(req.user);
+
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "Reviews retrieved successfully for admin.",
+      data: result,
+    });
+  }
+);
+
+const updateReview = catchAsync(async (req: CustomRequest, res: Response) => {
   const { reviewId } = req.params;
 
-  const result = await ReviewService.updateReview(reviewId, req.body);
+  const result = await ReviewService.updateReview(reviewId, req.body, req.user);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -43,10 +59,10 @@ const updateReview = catchAsync(async (req, res) => {
   });
 });
 
-const deleteReview = catchAsync(async (req, res) => {
+const deleteReview = catchAsync(async (req: CustomRequest, res: Response) => {
   const { reviewId } = req.params;
 
-  const result = await ReviewService.deleteReview(reviewId);
+  const result = await ReviewService.deleteReview(reviewId,req.user);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -59,6 +75,7 @@ const deleteReview = catchAsync(async (req, res) => {
 export const ReviewController = {
   createReview,
   getReviewsByUserId,
+  getAllReviewForAdmin,
   updateReview,
   deleteReview,
 };
