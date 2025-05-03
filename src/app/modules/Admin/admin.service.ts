@@ -2,19 +2,26 @@ import { User, UserStatus } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 
 const getAdminStats = async (user: any) => {
+  const totalEvents = (await prisma.event.findMany()).length;
+  const upcomingEvents = await prisma.event.count({
+    where: {
+      status: "UPCOMING",
+    },
+  });
+
   const allSubscribers = await prisma.newsletterSubscriber.findMany({
     orderBy: {
-      createdAt: "desc", // or any timestamp field
+      createdAt: "desc",
     },
     take: 6,
   });
 
   const stats = {
-    totalEvents: 12, // Static
+    totalEvents,
     eventAttendees: 145, // Static
-    upcomingEvents: 4, // Static
+    upcomingEvents,
     eventRating: 4.6, // Static
-    recentSubscribers: allSubscribers, // Array of up to 6 subscribers
+    recentSubscribers: allSubscribers,
   };
 
   return stats;
