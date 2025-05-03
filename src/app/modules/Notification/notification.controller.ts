@@ -10,6 +10,9 @@ import { notificationService } from "./notification.service";
 const addNotification = catchAsync(async (req: Request, res: Response): Promise<void> => {
 
     const message = req.body.message;
+
+    console.log(req.user);
+    
   
     const result = await notificationService.addNotificationIntoDB(message);
 
