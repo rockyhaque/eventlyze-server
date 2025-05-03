@@ -23,4 +23,10 @@ router.post(
   participationController.createParticipantion
 );
 
+router.delete(
+  "/cancel-participation/:id",
+  auth(UserRole.USER),
+  participationController.cancelParticipation
+);
+
 export const ParticipantRoutes = router;

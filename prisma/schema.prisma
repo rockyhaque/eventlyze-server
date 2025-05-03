@@ -158,6 +158,7 @@ enum ParticipantStatus {
   REQUESTED
   APPROVED
   REJECTED
+  CANCELLED
 }
 
 enum PaymentStatus {

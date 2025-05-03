@@ -24,6 +24,10 @@ const getJoinedEventsByUser = async (user: any) => {
     },
   });
 
+  if (joinedEvents.length === 0) {
+    throw new AppError(StatusCodes.NOT_FOUND, "You haven't joined any event");
+  }
+
   return joinedEvents;
 };
 
@@ -33,6 +37,10 @@ const getJoinedAllEventsByAdmin = async () => {
       event: true,
     },
   });
+
+  if (joinedAllEvents.length === 0) {
+    throw new AppError(StatusCodes.NOT_FOUND, "No Paricipation Found");
+  }
 
   return joinedAllEvents;
 };
@@ -132,8 +140,39 @@ const createParticipation = async (payload: any, user: any) => {
   }
 };
 
+const cancelParticipation = async (id: any) => {
+  const participationData = await prisma.participant.findUnique({
+    where: {
+      id,
+      status: {
+        in: [ParticipantStatus.JOINED, ParticipantStatus.APPROVED],
+      },
+    },
+  });
+
+  console.log(participationData);
+
+  if (!participationData) {
+    throw new AppError(
+      StatusCodes.NOT_FOUND,
+      "No active participation found to cancel"
+    );
+  }
+
+  const result = await prisma.participant.update({
+    where: {
+      id,
+    },
+    data: {
+      status: ParticipantStatus.CANCELLED,
+    },
+  });
+  return result;
+};
+
 export const participantService = {
   getJoinedEventsByUser,
   getJoinedAllEventsByAdmin,
   createParticipation,
+  cancelParticipation,
 };

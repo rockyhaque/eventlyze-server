@@ -49,8 +49,24 @@ const createParticipantion = catchAsync(
   }
 );
 
+const cancelParticipation = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await participantService.cancelParticipation(
+        id
+    );
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "Participant Cancelled Successfully!",
+      data: result,
+    });
+  }
+);
+
 export const participationController = {
   getJoinedEventsByUser,
   getJoinedAllEventsByAdmin,
   createParticipantion,
+  cancelParticipation
 };
