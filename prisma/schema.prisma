@@ -122,7 +122,7 @@ model Notification {
   userId    String
   eventId   String
   message   String
-  read      Boolean
+  read      Boolean  @default(false)
   user      User     @relation(fields: [userId], references: [id])
   event     Event    @relation(fields: [eventId], references: [id])
   createdAt DateTime @default(now())
