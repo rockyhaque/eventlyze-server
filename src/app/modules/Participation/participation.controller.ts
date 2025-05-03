@@ -21,6 +21,18 @@ const getJoinedEventsByUser = catchAsync(
   }
 );
 
+const getJoinedAllEventsByAdmin = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await participantService.getJoinedAllEventsByAdmin();
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "All Joined events fetched successfully",
+      data: result,
+    });
+  }
+);
+
 const createParticipantion = catchAsync(
   async (req: Request & { user?: TAuthUser }, res: Response) => {
     const user = req.user;
@@ -39,5 +51,6 @@ const createParticipantion = catchAsync(
 
 export const participationController = {
   getJoinedEventsByUser,
+  getJoinedAllEventsByAdmin,
   createParticipantion,
 };

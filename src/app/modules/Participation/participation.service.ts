@@ -27,6 +27,16 @@ const getJoinedEventsByUser = async (user: any) => {
   return joinedEvents;
 };
 
+const getJoinedAllEventsByAdmin = async () => {
+  const joinedAllEvents = await prisma.participant.findMany({
+    include: {
+      event: true,
+    },
+  });
+
+  return joinedAllEvents;
+};
+
 const createParticipation = async (payload: any, user: any) => {
   const userData = await prisma.user.findUnique({
     where: {
@@ -124,5 +134,6 @@ const createParticipation = async (payload: any, user: any) => {
 
 export const participantService = {
   getJoinedEventsByUser,
+  getJoinedAllEventsByAdmin,
   createParticipation,
 };

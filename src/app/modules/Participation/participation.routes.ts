@@ -11,6 +11,12 @@ router.get(
   participationController.getJoinedEventsByUser
 );
 
+router.get(
+  "/joined-all-events",
+  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
+  participationController.getJoinedAllEventsByAdmin
+);
+
 router.post(
   "/join-event",
   auth(UserRole.USER),
