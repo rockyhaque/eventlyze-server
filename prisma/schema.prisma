@@ -69,18 +69,18 @@ model Event {
   invite  Invite?  @relation(fields: [inviteId], references: [id])
   owner   User     @relation(fields: [ownerId], references: [id])
   payment Payment? @relation(fields: [paymentId], references: [paymentId])
-  review  Review?  @relation(fields: [reviewId], references: [id])
+  review  Review[]
 
   @@map("events")
 }
 
 model Participant {
-  id        String            @id @default(uuid())
+  id        String             @id @default(uuid())
   eventId   String
   userId    String
   status    ParticipantStatus?
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
 
   event Event @relation(fields: [eventId], references: [id])
   user  User  @relation(fields: [userId], references: [id])
@@ -110,12 +110,15 @@ model Payment {
 
 // review model
 model Review {
-  id        String   @id @default(uuid())
-  event     Event[]
-  userId    String
-  user      User     @relation(fields: [id], references: [id])
-  content   String
-  rating    Int
+  id      String @id @default(uuid())
+  eventId String
+  userId  String
+  content String
+  rating  Int
+
+  event Event @relation(fields: [eventId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
