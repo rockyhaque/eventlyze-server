@@ -2,37 +2,24 @@ import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 
-import { Request, Response } from 'express';
+import { Request, Response } from "express";
 import { participantService } from "./participation.service";
+import { TAuthUser } from "../../interfaces/common";
 
-interface CustomRequest extends Request {
-    user?: {
-        email: string;
-    };
-}
-
-const requestToJoinEvent = catchAsync(
-    async (req: CustomRequest, res: Response): Promise<void> => {
-        const userEmail = req.user?.email;
-        const { eventId } = req.body;
-
-        if (!userEmail) {
-            throw new Error("User email is required");
-        }
-        const result = await participantService.handleJoinRequest(userEmail, eventId);
-
-
-        sendResponse(res, {
-            statusCode: StatusCodes.CREATED,
-            success: true,
-            message: result.message,
-            data: result.data || null,
-        });
-    }
+const createParticipantion = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const user = req.user;
+    const result = await participantService.createParticipation(req.body, user as TAuthUser);
+    sendResponse(res, {
+      statusCode: StatusCodes.CREATED,
+      success: true,
+      message: "Participant joined Successfully!",
+      data: result,
+    });
+  }
 );
 
-
 export const participationController = {
-    requestToJoinEvent
+  // requestToJoinEvent
+  createParticipantion,
 };
-

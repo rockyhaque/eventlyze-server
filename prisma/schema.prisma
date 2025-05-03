@@ -53,23 +53,20 @@ model Event {
   eventStartTime      DateTime
   eventEndTime        DateTime
   seat                Int
-  eventBanner             String?
+  eventBanner         String?
   status              EventStatus @default(UPCOMING)
   eventType           EventType   @default(OFFLINE)
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
 
-
-
   paymentId String?
   reviewId  String?
   ownerId   String
-  inviteId            String?
- 
+  inviteId  String?
 
   participant Participant[]
 
-   invite              Invite?     @relation(fields: [inviteId], references: [id])
+  invite  Invite?  @relation(fields: [inviteId], references: [id])
   owner   User     @relation(fields: [ownerId], references: [id])
   payment Payment? @relation(fields: [paymentId], references: [paymentId])
   review  Review?  @relation(fields: [reviewId], references: [id])
@@ -77,29 +74,25 @@ model Event {
   @@map("events")
 }
 
-
 model Participant {
   id        String            @id @default(uuid())
   eventId   String
   userId    String
-  status    ParticipantStatus @default(REQUESTED)
+  status    ParticipantStatus?
   createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
 
-  event     Event             @relation(fields: [eventId], references: [id])
-  user      User              @relation(fields: [userId], references: [id])
-  
+  event Event @relation(fields: [eventId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
   @@map("participants")
 }
 
-
 model Invite {
-  id       String   @id @default(uuid())
-  email    String  
-  event   Event[]
-
+  id    String  @id @default(uuid())
+  email String
+  event Event[]
 }
-
-
 
 // payment model
 model Payment {
