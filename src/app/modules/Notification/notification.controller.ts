@@ -36,7 +36,7 @@ const allNotificationByAdmin = catchAsync(async (req: Request, res: Response): P
 });
 
 
-// Add Notification
+// All Notification by user
 const allNotificationByUser = catchAsync(async (req: Request, res: Response): Promise<void> => {
 
     const result = await notificationService.allNotificatoinByUserIntoDB();
