@@ -14,7 +14,7 @@ CREATE TYPE "EventStatus" AS ENUM ('UPCOMING', 'CANCELED', 'ONGOING', 'COMPLETED
 CREATE TYPE "EventType" AS ENUM ('ONLINE', 'OFFLINE');
 
 -- CreateEnum
-CREATE TYPE "ParticipantStatus" AS ENUM ('JOINED', 'REQUESTED', 'APPROVED', 'REJECTED');
+CREATE TYPE "ParticipantStatus" AS ENUM ('JOINED', 'REQUESTED', 'APPROVED', 'REJECTED', 'CANCELLED');
 
 -- CreateEnum
 CREATE TYPE "PaymentStatus" AS ENUM ('SUCCESS', 'CANCELLED', 'PENDING', 'COMPLETED', 'FAILED');
@@ -64,6 +64,7 @@ CREATE TABLE "events" (
     "eventStartTime" TIMESTAMP(3) NOT NULL,
     "eventEndTime" TIMESTAMP(3) NOT NULL,
     "seat" INTEGER NOT NULL,
+    "eventBanner" TEXT,
     "status" "EventStatus" NOT NULL DEFAULT 'UPCOMING',
     "eventType" "EventType" NOT NULL DEFAULT 'OFFLINE',
     "paymentId" TEXT,
@@ -78,8 +79,9 @@ CREATE TABLE "participants" (
     "id" TEXT NOT NULL,
     "eventId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "status" "ParticipantStatus" NOT NULL DEFAULT 'REQUESTED',
+    "status" "ParticipantStatus",
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "participants_pkey" PRIMARY KEY ("id")
 );
@@ -95,6 +97,7 @@ CREATE TABLE "Invite" (
 -- CreateTable
 CREATE TABLE "Payment" (
     "paymentId" TEXT NOT NULL,
+    "eventId" TEXT NOT NULL,
     "userId" TEXT,
     "paymentUrl" TEXT NOT NULL,
     "status" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
@@ -123,7 +126,7 @@ CREATE TABLE "Notification" (
     "userId" TEXT NOT NULL,
     "eventId" TEXT NOT NULL,
     "message" TEXT NOT NULL,
-    "read" BOOLEAN NOT NULL,
+    "read" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

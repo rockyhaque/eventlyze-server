@@ -6,7 +6,7 @@ import auth from "../../middlewares/auth";
 import { UserRole } from "@prisma/client";
 import validateRequest from "../../middlewares/validationRequest";
 const router = express.Router();
-
+// demo
 router.get(
   "/all-users",
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),

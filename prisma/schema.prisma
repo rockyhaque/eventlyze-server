@@ -54,6 +54,7 @@ model Event {
   eventStartTime      DateTime
   eventEndTime        DateTime
   seat                Int
+  eventBanner         String?
   status              EventStatus @default(UPCOMING)
   eventType           EventType   @default(OFFLINE)
 
@@ -73,11 +74,12 @@ model Event {
 }
 
 model Participant {
-  id        String            @id @default(uuid())
+  id        String             @id @default(uuid())
   eventId   String
   userId    String
-  status    ParticipantStatus @default(REQUESTED)
-  createdAt DateTime          @default(now())
+  status    ParticipantStatus?
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
 
   event Event @relation(fields: [eventId], references: [id])
   user  User  @relation(fields: [userId], references: [id])
@@ -94,6 +96,7 @@ model Invite {
 // payment model
 model Payment {
   paymentId  String        @id
+  eventId    String
   userId     String?
   paymentUrl String
   status     PaymentStatus @default(PENDING)
@@ -167,6 +170,7 @@ enum ParticipantStatus {
   REQUESTED
   APPROVED
   REJECTED
+  CANCELLED
 }
 
 enum PaymentStatus {

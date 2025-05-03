@@ -1,17 +1,21 @@
 
 import { StatusCodes } from "http-status-codes";
-import { Request } from "express";
+import { Request, Response } from "express";
 import sendResponse from "../../../shared/sendResponse";
 import catchAsync from "../../../shared/catchAsync";
 import { eventService } from "./event.service";
+import pick from "../../../shared/pick";
+import { eventSearchAbleFields, userFilterableFields } from "./event.constant";
 
 interface CustomRequest extends Request {
     user?: any;
 }
 
 
-const createEvent = catchAsync(async (req: CustomRequest, res) => {
+const createEvent = catchAsync(async (req: CustomRequest, res:Response) => {
+  
     const result = await eventService.createEvent(req.body, req.user);
+    console.log(result);
     sendResponse(res, {
         statusCode: StatusCodes.OK,
         success: true,
@@ -23,7 +27,9 @@ const createEvent = catchAsync(async (req: CustomRequest, res) => {
 
 
 const getEvents = catchAsync(async (req: CustomRequest, res) => {
-    const result = await eventService.getAllEvents.getFilteredEvents(req.query);
+    const filters = pick(req.query,userFilterableFields );
+    const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+    const result = await eventService.getAllEvents(filters,options);
     sendResponse(res, {
         statusCode: StatusCodes.OK,
         success: true,
