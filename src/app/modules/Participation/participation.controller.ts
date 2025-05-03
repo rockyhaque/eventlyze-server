@@ -6,10 +6,28 @@ import { Request, Response } from "express";
 import { participantService } from "./participation.service";
 import { TAuthUser } from "../../interfaces/common";
 
+const getJoinedEventsByUser = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const user = req.user;
+    const result = await participantService.getJoinedEventsByUser(
+      user as TAuthUser
+    );
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "Joined events fetched successfully",
+      data: result,
+    });
+  }
+);
+
 const createParticipantion = catchAsync(
   async (req: Request & { user?: TAuthUser }, res: Response) => {
     const user = req.user;
-    const result = await participantService.createParticipation(req.body, user as TAuthUser);
+    const result = await participantService.createParticipation(
+      req.body,
+      user as TAuthUser
+    );
     sendResponse(res, {
       statusCode: StatusCodes.CREATED,
       success: true,
@@ -20,6 +38,6 @@ const createParticipantion = catchAsync(
 );
 
 export const participationController = {
-  // requestToJoinEvent
+  getJoinedEventsByUser,
   createParticipantion,
 };

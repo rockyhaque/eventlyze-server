@@ -3,6 +3,30 @@ import prisma from "../../../shared/prisma";
 import AppError from "../../errors/AppError";
 import { StatusCodes } from "http-status-codes";
 
+const getJoinedEventsByUser = async (user: any) => {
+  const userData = await prisma.user.findUnique({
+    where: {
+      email: user.email,
+    },
+  });
+
+  if (!userData) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
+
+  const joinedEvents = await prisma.participant.findMany({
+    where: {
+      userId: userData.id,
+      status: ParticipantStatus.JOINED,
+    },
+    include: {
+      event: true,
+    },
+  });
+
+  return joinedEvents;
+};
+
 const createParticipation = async (payload: any, user: any) => {
   const userData = await prisma.user.findUnique({
     where: {
@@ -21,7 +45,6 @@ const createParticipation = async (payload: any, user: any) => {
       id: eventId,
     },
   });
-
 
   if (!eventData) {
     throw new AppError(StatusCodes.NOT_FOUND, "Event Not Found");
@@ -100,5 +123,6 @@ const createParticipation = async (payload: any, user: any) => {
 };
 
 export const participantService = {
+  getJoinedEventsByUser,
   createParticipation,
 };

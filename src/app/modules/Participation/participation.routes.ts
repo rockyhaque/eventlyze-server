@@ -5,6 +5,12 @@ import { participationController } from "./participation.controller";
 const express = require("express");
 const router = express.Router();
 
+router.get(
+  "/joined-event",
+  auth(UserRole.USER),
+  participationController.getJoinedEventsByUser
+);
+
 router.post(
   "/join-event",
   auth(UserRole.USER),
