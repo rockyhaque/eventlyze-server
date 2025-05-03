@@ -1,13 +1,13 @@
 
 
 // add Notification
-const addNotificationIntoDB = async () => {
+const addNotificationIntoDB = async (message: string) => {
 
     // const result = await prisma.specialties.create({
         
     // });
 
-    console.log("notification");
+    console.log("service", message);
     
 
     // return result;
