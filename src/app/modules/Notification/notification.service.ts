@@ -1,8 +1,22 @@
 
 
+import { Notification } from "@prisma/client";
+import prisma from "../../../shared/prisma";
+
+
 // Admin all notification
-const allNotificatoinByAdminIntoDB = async () => {
-    console.log("admin Notification");
+const allNotificatoinByAdminIntoDB = async ():Promise<Notification[]> => {
+   
+    const allNotification =await prisma.notification.findMany({
+        where: {
+            read: false
+        }
+    });
+    
+    console.log(allNotification);
+    
+    
+    return  allNotification
 
 }
 

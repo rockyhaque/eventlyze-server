@@ -47,7 +47,7 @@ const moduleRoutes = [
     route: ReviewRoutes,
   },
   {
-    path: "/notification",
+    path: "/notifications",
     route: NotificationRoutes,
   },
 
