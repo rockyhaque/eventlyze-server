@@ -6,8 +6,12 @@ import { IPaginationOptions } from "../../interfaces/pagination";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 import { userSearchAbleFields } from "./user.constant";
 import { TAuthUser } from "../../interfaces/common";
+import AppError from "../../errors/AppError";
+import { StatusCodes } from "http-status-codes";
 
-const createUser = async (req: Request): Promise<User> => {
+type TSafeUser = Omit<User, "password">;
+
+const createUser = async (req: Request): Promise<TSafeUser> => {
   const hashedPassword: string = await bcrypt.hash(req.body.password, 12);
   const userData = {
     email: req.body.email,
@@ -19,22 +23,40 @@ const createUser = async (req: Request): Promise<User> => {
     gender: req.body.gender,
   };
 
-  const result = await prisma.$transaction(async (tx) => {
-    const createdUserData = await tx.user.create({
-      data: userData,
-    });
-
-    // const createdAdminData = await tx.admin.create({
-    //   data: req.body.admin,
-    // });
-
-    return createdUserData;
+  const existingUser = await prisma.user.findUnique({
+    where: {
+      email: userData.email,
+    },
   });
 
-  return result;
+  if (existingUser) {
+    throw new AppError(
+      StatusCodes.CONFLICT,
+      "Email already exists. Please use another email."
+    );
+  }
+
+  const createdUserData = await prisma.user.create({
+    data: userData,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      photo: true,
+      contactNumber: true,
+      gender: true,
+      status: true,
+      needPasswordChange: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  return createdUserData;
 };
 
-const createAdmin = async (req: Request) => {
+const createAdmin = async (req: Request): Promise<TSafeUser> => {
   const hashedPassword: string = await bcrypt.hash(req.body.password, 12);
   const userData = {
     email: req.body.email,
@@ -43,20 +65,37 @@ const createAdmin = async (req: Request) => {
     photo: req.body.photo,
   };
 
-  const result = await prisma.$transaction(async (tx) => {
-    //   await tx.user.create({
-    //     data: userData,
-    //   });
-
-    const createdAdminData = await tx.user.create({
-      // data: req.body.admin,
-      data: userData,
-    });
-
-    return createdAdminData;
+  const existingAdmin = await prisma.user.findUnique({
+    where: {
+      email: userData.email,
+    },
   });
 
-  return result;
+  if (existingAdmin) {
+    throw new AppError(
+      StatusCodes.CONFLICT,
+      "Email already exists. Please use another email."
+    );
+  }
+
+  const createdAdminData = await prisma.user.create({
+    data: userData,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      photo: true,
+      contactNumber: true,
+      gender: true,
+      status: true,
+      needPasswordChange: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  return createdAdminData;
 };
 
 const getAllUserFromDB = async (params: any, options: IPaginationOptions) => {
@@ -198,7 +237,6 @@ const updateMyProfile = async (user: TAuthUser, req: Request) => {
       status: UserStatus.ACTIVE,
     },
   });
-
 
   // According the role, data will update
   let profileInfo;
