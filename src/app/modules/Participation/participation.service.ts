@@ -150,7 +150,7 @@ const cancelParticipation = async (id: any) => {
     },
   });
 
-  console.log(participationData);
+  // console.log(participationData);
 
   if (!participationData) {
     throw new AppError(
