@@ -43,13 +43,9 @@ const createEvent = async (data: Event, user: JwtPayload) => {
     throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
   }
 
-  // console.log("hgsdgdsf");
-
-
   const result = await prisma.$transaction(async (transactionClient: Prisma.TransactionClient) => {
 
-
-
+    // Event Create function
     const event = await transactionClient.event.create({
       data: {
         ...data,
@@ -57,32 +53,19 @@ const createEvent = async (data: Event, user: JwtPayload) => {
       },
     });
 
-    // console.log(event);
-    //   console.log("user", existingUser.id);
-    //   console.log("event id",event.id);
-
-
-
-
-    const notification = await transactionClient.notification.create({
+    // Botification Created function
+    await transactionClient.notification.create({
       data: {
         userId: existingUser?.id,
         eventId: event?.id,
         message: `New ${event?.title} event created by ${email}`
       }
-
     });
 
-      console.log(notification);
-
-
-    // return event;
-    // console.log("aaaaaa");
-
-    return null;
+    return event;
   });
 
-  return null;
+  return result;
 };
 
 
