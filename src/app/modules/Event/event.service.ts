@@ -9,7 +9,30 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
+// const createEvent = async (data: Event, user: JwtPayload) => {
+//   const email = user?.email;
+//   const existingUser = await prisma.user.findUnique({
+//     where: { email },
+//     select: { id: true },
+//   });
+
+//   if (!existingUser) {
+//     throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+//   }
+
+//   const event = await prisma.event.create({
+//     data: {
+//       ...data,
+//       ownerId: existingUser.id,
+//     },
+//   });
+
+//   return event;
+// };
+
+
 const createEvent = async (data: Event, user: JwtPayload) => {
+
   const email = user?.email;
   const existingUser = await prisma.user.findUnique({
     where: { email },
@@ -17,18 +40,52 @@ const createEvent = async (data: Event, user: JwtPayload) => {
   });
 
   if (!existingUser) {
-    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+    throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
   }
 
-  const event = await prisma.event.create({
-    data: {
-      ...data,
-      ownerId: existingUser.id,
-    },
+  // console.log("hgsdgdsf");
+
+
+  const result = await prisma.$transaction(async (transactionClient: Prisma.TransactionClient) => {
+
+
+
+    const event = await transactionClient.event.create({
+      data: {
+        ...data,
+        ownerId: existingUser.id,
+      },
+    });
+
+    // console.log(event);
+    //   console.log("user", existingUser.id);
+    //   console.log("event id",event.id);
+
+
+
+
+    const notification = await transactionClient.notification.create({
+      data: {
+        userId: existingUser?.id,
+        eventId: event?.id,
+        message: `New ${event?.title} event created by ${email}`
+      }
+
+    });
+
+      console.log(notification);
+
+
+    // return event;
+    // console.log("aaaaaa");
+
+    return null;
   });
 
-  return event;
+  return null;
 };
+
+
 
 const parseBoolean = (value: string | undefined): boolean | undefined => {
   if (value === "true") return true;
@@ -90,11 +147,11 @@ const getAllEvents = async (params: any, options: any) => {
     orderBy:
       options.sortBy && options.sortOrder
         ? {
-            [options.sortBy]: options.sortOrder,
-          }
+          [options.sortBy]: options.sortOrder,
+        }
         : {
-            createdAt: "desc",
-          },
+          createdAt: "desc",
+        },
   });
 
   const total = await prisma.Event.count({
