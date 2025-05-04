@@ -1,5 +1,8 @@
 import { User, UserStatus } from "@prisma/client";
 import prisma from "../../../shared/prisma";
+import AppError from "../../errors/AppError";
+import { StatusCodes } from "http-status-codes";
+import { safeUserSelect } from "../User/user.constant";
 
 const getAdminStats = async (user: any) => {
   const totalEvents = (await prisma.event.findMany()).length;
@@ -27,7 +30,7 @@ const getAdminStats = async (user: any) => {
   return stats;
 };
 
-const permanentDeleteUser = async (id: string): Promise<User | null> => {
+const permanentDeleteUser = async (id: string) => {
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       id,
@@ -35,16 +38,18 @@ const permanentDeleteUser = async (id: string): Promise<User | null> => {
     },
   });
 
-  const result = await prisma.user.delete({
+  if (!userData) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
+
+  await prisma.user.delete({
     where: {
       email: userData.email,
     },
   });
-
-  return result;
 };
 
-const softUserDelete = async (id: string): Promise<User | null> => {
+const softUserDelete = async (id: string) => {
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       id,
@@ -59,6 +64,7 @@ const softUserDelete = async (id: string): Promise<User | null> => {
     data: {
       status: UserStatus.DELETED,
     },
+    select: safeUserSelect,
   });
 
   return result;
