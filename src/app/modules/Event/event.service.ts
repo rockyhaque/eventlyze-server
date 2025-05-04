@@ -5,37 +5,11 @@ import AppError from "../../errors/AppError";
 import { run } from "node:test";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 import { eventSearchAbleFields } from "./event.constant";
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
-
-// const createEvent = async (data:Event, user:JwtPayload) => {
-
-//     const email = user?.email;
-//     const existingUser = await prisma.user.findUnique({
-//         where: { email },
-//         select: { id: true },
-//     });
-
-//     if (!existingUser) {
-//         throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
-//     }
-
-//     const event = await prisma.event.create({
-//         data: {
-//             ...data,
-//             ownerId: existingUser.id,
-//         },
-//     })
-
-//     return event;
-// };
-
-
-
 const createEvent = async (data: Event, user: JwtPayload) => {
-
   const email = user?.email;
   const existingUser = await prisma.user.findUnique({
     where: { email },
@@ -43,59 +17,24 @@ const createEvent = async (data: Event, user: JwtPayload) => {
   });
 
   if (!existingUser) {
-    throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
   }
 
-  // console.log("hgsdgdsf");
-  
-
-  const result = await prisma.$transaction(async (transactionClient: Prisma.TransactionClient) => {
-
-
-
-   const event = await transactionClient.event.create({
-      data: {
-        ...data,
-        ownerId: existingUser.id,
-      },
-    });
-
-    console.log(event);
-  //   console.log("user", existingUser.id);
-  //   console.log("event id",event.id);
-    
-    
-    
-
-  //   const notification = await transactionClient.notification.create({
-  //     data: {
-  //       userId: existingUser?.id,
-  //       eventId: event?.id,
-  //       message: `New ${event?.title} event created by ${email}`
-  //     }
-      
-  //   });
-
-  //   console.log(notification);
-    
-
-    // return event;
-    // console.log("aaaaaa");
-    
-    return null;
+  const event = await prisma.event.create({
+    data: {
+      ...data,
+      ownerId: existingUser.id,
+    },
   });
 
-  return null;
+  return event;
 };
-
-
 
 const parseBoolean = (value: string | undefined): boolean | undefined => {
-  if (value === 'true') return true;
-  if (value === 'false') return false;
+  if (value === "true") return true;
+  if (value === "false") return false;
   return undefined;
 };
-
 
 const getAllEvents = async (params: any, options: any) => {
   // console.log(options)
@@ -115,7 +54,6 @@ const getAllEvents = async (params: any, options: any) => {
   }
 
   if (Object.keys(filterData).length > 0) {
-
   }
 
   //   For spesific field filter
@@ -123,7 +61,6 @@ const getAllEvents = async (params: any, options: any) => {
     andConditions.push({
       AND: Object.keys(filterData).map((key) => {
         let value = (filterData as any)[key];
-
 
         if (value === "true") value = true;
         if (value === "false") value = false;
@@ -137,23 +74,27 @@ const getAllEvents = async (params: any, options: any) => {
     });
   }
 
+  const whereConditions: Prisma.EventWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
 
-  const whereConditions: Prisma.EventWhereInput = andConditions.length > 0 ? { AND: andConditions } : {};
-
-  console.dir(whereConditions, { depth: null })
+  console.dir(whereConditions, { depth: null });
 
   const result = await prisma.Event.findMany({
     where: whereConditions,
+    include: {
+      participant: true,
+      review: true,
+    },
     skip,
     take: limit,
     orderBy:
       options.sortBy && options.sortOrder
         ? {
-          [options.sortBy]: options.sortOrder,
-        }
+            [options.sortBy]: options.sortOrder,
+          }
         : {
-          createdAt: "desc",
-        },
+            createdAt: "desc",
+          },
   });
 
   const total = await prisma.Event.count({
@@ -167,13 +108,15 @@ const getAllEvents = async (params: any, options: any) => {
     },
     data: result,
   };
-
-}
+};
 
 const getEventById = async (id: string) => {
   const event = await prisma.event.findUnique({
     where: { id },
-
+    include: {
+      participant: true,
+      review: true,
+    },
   });
   return event;
 };
@@ -193,13 +136,10 @@ const deleteSingleEvent = async (id: string) => {
   return event;
 };
 
-
-
 export const eventService = {
   createEvent,
   getAllEvents,
   getEventById,
   updateSingleEvent,
   deleteSingleEvent,
-
 };

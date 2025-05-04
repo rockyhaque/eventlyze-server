@@ -1,38 +1,55 @@
+import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 import { ReviewService } from "./review.service";
 
-const createReview = catchAsync(async (req, res) => {
-  const { eventId } = req.params;
+interface CustomRequest extends Request {
+  user?: any;
+}
 
-  const result = await ReviewService.createReview(eventId, req.body);
-
-  sendResponse(res, {
-    statusCode: StatusCodes.OK,
-    success: true,
-    message: "Review created Successfully.",
-    data: result,
-  });
-});
-
-const getReviews = catchAsync(async (req, res) => {
-  const { eventId } = req.params;
-
-  const result = await ReviewService.getReviews(eventId);
+const createReview = catchAsync(async (req: CustomRequest, res: Response) => {
+  const result = await ReviewService.createReview(req.body, req.user);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
-    message: "Reviews retrieved successfully.",
+    message: "Review created successfully.",
     data: result,
   });
 });
 
-const updateReview = catchAsync(async (req, res) => {
+const getReviewsByUserId = catchAsync(
+  async (req: CustomRequest, res: Response) => {
+    const result = await ReviewService.getReviewsByUserId(req.user);
+
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "Reviews retrieved successfully.",
+      data: result,
+    });
+  }
+);
+
+// get all reviews for admin
+const getAllReviewForAdmin = catchAsync(
+  async (req: CustomRequest, res: Response) => {
+    const result = await ReviewService.getAllReviewForAdmin(req.user);
+
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "Reviews retrieved successfully for admin.",
+      data: result,
+    });
+  }
+);
+
+const updateReview = catchAsync(async (req: CustomRequest, res: Response) => {
   const { reviewId } = req.params;
 
-  const result = await ReviewService.updateReview(reviewId, req.body);
+  const result = await ReviewService.updateReview(reviewId, req.body, req.user);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -42,10 +59,10 @@ const updateReview = catchAsync(async (req, res) => {
   });
 });
 
-const deleteReview = catchAsync(async (req, res) => {
+const deleteReview = catchAsync(async (req: CustomRequest, res: Response) => {
   const { reviewId } = req.params;
 
-  const result = await ReviewService.deleteReview(reviewId);
+  const result = await ReviewService.deleteReview(reviewId,req.user);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -57,7 +74,8 @@ const deleteReview = catchAsync(async (req, res) => {
 
 export const ReviewController = {
   createReview,
-  getReviews,
+  getReviewsByUserId,
+  getAllReviewForAdmin,
   updateReview,
   deleteReview,
 };
