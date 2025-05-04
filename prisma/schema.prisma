@@ -67,7 +67,7 @@ model Event {
   invite  Invite?  @relation(fields: [inviteId], references: [id])
   owner   User     @relation(fields: [ownerId], references: [id])
   payment Payment? @relation(fields: [paymentId], references: [paymentId])
-  review  Review[]
+  review  Review?  @relation(fields: [reviewId], references: [id])
 
   @@map("events")
 }
