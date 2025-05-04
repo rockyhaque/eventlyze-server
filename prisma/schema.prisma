@@ -8,22 +8,23 @@ datasource db {
 }
 
 model User {
-  id                 String        @id @default(uuid())
+  id                 String         @id @default(uuid())
   name               String?
-  email              String        @unique
+  email              String         @unique
   password           String
-  needPasswordChange Boolean       @default(true)
+  needPasswordChange Boolean        @default(true)
   contactNumber      String?
-  role               UserRole?     @default(USER)
+  role               UserRole?      @default(USER)
   gender             Gender?
   photo              String?
-  status             UserStatus    @default(ACTIVE)
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
+  status             UserStatus     @default(ACTIVE)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
   Event              Event[]
   Participant        Participant[]
   Payment            Payment[]
   Review             Review[]
+  notification       Notification[]
 
   @@map("users")
 }
@@ -66,12 +67,25 @@ model Event {
 
   participant Participant[]
 
-  invite  Invite?  @relation(fields: [inviteId], references: [id])
-  owner   User     @relation(fields: [ownerId], references: [id])
-  payment Payment? @relation(fields: [paymentId], references: [paymentId])
-  review  Review[]
+  invite       Invite?        @relation(fields: [inviteId], references: [id])
+  owner        User           @relation(fields: [ownerId], references: [id])
+  payment      Payment?       @relation(fields: [paymentId], references: [paymentId])
+  review       Review[]
+  notification Notification[]
 
   @@map("events")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  eventId   String
+  message   String
+  read      Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Participant {
