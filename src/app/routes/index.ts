@@ -7,6 +7,7 @@ import { adminRoutes } from "../modules/Admin/admin.routes";
 import { ReviewRoutes } from "../modules/Review/review.routes";
 import { ParticipantRoutes } from "../modules/Participation/participation.routes";
 import { SubscriberRoutes } from "../modules/Subscriber/subscriber.routes";
+import { NotificationRoutes } from "../modules/Notification/notification.route";
 
 
 
@@ -45,6 +46,11 @@ const moduleRoutes = [
     path: "/reviews",
     route: ReviewRoutes,
   },
+  {
+    path: "/notification",
+    route: NotificationRoutes,
+  },
+
 ];
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
