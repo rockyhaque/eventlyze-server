@@ -9,11 +9,11 @@ const router = express.Router();
 
 
 
-// All Notification Route By Admin
+// All Notification Route
 router.get(
-    "/admin-notification",
+    "/all-notification",
     auth(UserRole.USER, UserRole.ADMIN, UserRole.SUPER_ADMIN),
-    NotificationController.allNotificationByAdmin
+    NotificationController.allNotification
 );
 
 

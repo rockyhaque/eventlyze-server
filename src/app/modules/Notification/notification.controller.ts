@@ -9,10 +9,10 @@ interface CustomRequest extends Request {
 }
 
 
-// All Notification by Admin
-const allNotificationByAdmin = catchAsync(async (req: CustomRequest, res: Response): Promise<void> => {
+// All Notification
+const allNotification = catchAsync(async (req: CustomRequest, res: Response): Promise<void> => {
 
-    const result = await notificationService.allNotificatoinByAdminIntoDB(req.user);
+    const result = await notificationService.allNotificatoinIntoDB(req.user);
 
     sendResponse(res, {
         statusCode: StatusCodes.OK,
@@ -41,6 +41,6 @@ const allNotificationByUser = catchAsync(async (req: Request, res: Response): Pr
 
 
 export const NotificationController = {
-    allNotificationByAdmin,
+    allNotification,
     allNotificationByUser
 };

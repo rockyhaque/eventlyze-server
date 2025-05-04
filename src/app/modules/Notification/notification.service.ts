@@ -5,76 +5,58 @@ import prisma from "../../../shared/prisma";
 import { JwtPayload } from "jsonwebtoken";
 
 
-// Admin all notification
-const allNotificatoinByAdminIntoDB = async (user: JwtPayload): Promise<
-    {
-        allNotifications: Notification[];
-        totalUnderdNotification: number;
+// get all notification
+const allNotificatoinIntoDB = async (user: JwtPayload): Promise<{
+    allNotifications: Notification[];
+    totalUnReadNotification: number;
+}> => {
+
+    // Check if user is admin/superadmin
+    if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+        const allNotification = await prisma.notification.findMany();
+
+        const unReadNotification = await prisma.notification.findMany({
+            where: {
+                read: false
+            }
+        });
+
+        const totalUnreadNotification = unReadNotification.length;
+
+        return {
+            allNotifications: allNotification,
+            totalUnReadNotification: totalUnreadNotification
+        };
     }
-> => {
+    // For regular users
+    else {
+        const existingUser = await prisma.user.findUnique({
+            where: {
+                email: user.email
+            }
+        });
 
-    // console.log(user.role);
+        const allNotificationUser = await prisma.notification.findMany({
+            where: {
+                userId: existingUser?.id
+            }
+        });
 
+        const unReadUserNotification = await prisma.notification.findMany({
+            where: {
+                userId: existingUser?.id,
+                read: false
+            }
+        });
 
-    // *********************** if user role= admin/superadmin
+        const totalUnreadNotification = unReadUserNotification.length;
 
-    // const allNotification = await prisma.notification.findMany();
-
-    // const unReadNotification = await prisma.notification.findMany({
-    //     where: {
-    //         read: false
-    //     }
-    // });
-
-    // const totalUnreadNotification = unReadNotification.length
-
-    // return {
-    //     allNotifications: allNotification,
-    //     totalUnderdNotification: totalUnreadNotification
-    // }
-
-
-        // *********************** if user role=user
-
-    // if user role= user
-    const existingUser = await prisma.user.findUnique({
-        where: {
-            email: user.email
-        }
-    });
-
-    // console.log(existingUser?.id);
-    
-
-    const allNotificationUser = await prisma.notification.findMany({
-        where: {
-            userId: existingUser?.id
-        }
-    });
-
-    // console.log(allNotificationUser);
-    
-
-    const unReadUserNotification = await prisma.notification.findMany({
-        where: {
-            read: false
-        }
-    });
-
-    // console.log(unReadNotification);
-    
-
-    const totalUnreadNotification = unReadUserNotification.length
-    // console.log(totalUnreadNotification);
-    
-
-    return {
-        allNotifications: allNotificationUser,
-        totalUnderdNotification: totalUnreadNotification
+        return {
+            allNotifications: allNotificationUser,
+            totalUnReadNotification: totalUnreadNotification
+        };
     }
-
-}
-
+};
 
 // User all notification
 const allNotificatoinByUserIntoDB = async () => {
@@ -84,6 +66,6 @@ const allNotificatoinByUserIntoDB = async () => {
 
 
 export const notificationService = {
-    allNotificatoinByAdminIntoDB,
+    allNotificatoinIntoDB,
     allNotificatoinByUserIntoDB
 }
