@@ -56,19 +56,19 @@ const addNotificationIntoDB = async (notification: INotification, user: TAuthUse
     //     data: notificationData as INotification
 
     // })
-    const result = await prisma.notification.create({
-        data: notificationData as INotification
-    })
+    // const result = await prisma.notification.create({
+    //     data: notificationData as INotification
+    // })
 
-    console.log(result);
+    // console.log(result);
 
 
 
     // console.log("service", message);
 
 
-    return result;
-    // return result
+    // return result;
+    return null
 };
 
 
