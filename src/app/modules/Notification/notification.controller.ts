@@ -12,23 +12,23 @@ interface CustomRequest extends Request {
 }
 
 // Add Notification
-const addNotification = catchAsync(async (req: CustomRequest, res: Response): Promise<void> => {
+// const addNotification = catchAsync(async (req: CustomRequest, res: Response): Promise<void> => {
 
-    const notification = req.body
-    const user = req.user
-    // console.log(user);
+//     const notification = req.body
+//     const user = req.user
+//     // console.log(user);
     
-    // const result = await notificationService.addNotificationIntoDB(message);
-    const result = await notificationService.addNotificationIntoDB(notification, user);
+//     // const result = await notificationService.addNotificationIntoDB(message);
+//     const result = await notificationService.addNotificationIntoDB(notification, user);
 
-    sendResponse(res, {
-        statusCode: StatusCodes.CREATED,
-        success: true,
-        // message: result
-        message: "Notification send succesfully",
-        data: result,
-    });
-});
+//     sendResponse(res, {
+//         statusCode: StatusCodes.CREATED,
+//         success: true,
+//         // message: result
+//         message: "Notification send succesfully",
+//         data: result,
+//     });
+// });
 
 
 // All Notification by Admin
@@ -63,7 +63,7 @@ const allNotificationByUser = catchAsync(async (req: Request, res: Response): Pr
 
 
 export const NotificationController = {
-    addNotification,
+    // addNotification,
     allNotificationByAdmin,
     allNotificationByUser
 };

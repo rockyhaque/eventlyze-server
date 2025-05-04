@@ -8,11 +8,11 @@ const router = express.Router();
 
 
 // Create Notification Route
-router.post(
-    "/create-notification",
-    auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.USER),
-    NotificationController.addNotification
-);
+// router.post(
+//     "/create-notification",
+//     auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.USER),
+//     NotificationController.addNotification
+// );
 
 
 // All Notification Route By Admin
