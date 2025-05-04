@@ -4,11 +4,15 @@ import sendResponse from "../../../shared/sendResponse";
 import { notificationService } from "./notification.service";
 import { Request, Response } from "express";
 
+interface CustomRequest extends Request {
+    user?: any;
+}
+
 
 // All Notification by Admin
-const allNotificationByAdmin = catchAsync(async (req: Request, res: Response): Promise<void> => {
+const allNotificationByAdmin = catchAsync(async (req: CustomRequest, res: Response): Promise<void> => {
 
-    const result = await notificationService.allNotificatoinByAdminIntoDB();
+    const result = await notificationService.allNotificatoinByAdminIntoDB(req.user);
 
     sendResponse(res, {
         statusCode: StatusCodes.OK,

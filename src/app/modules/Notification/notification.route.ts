@@ -12,6 +12,7 @@ const router = express.Router();
 // All Notification Route By Admin
 router.get(
     "/admin-notification",
+    auth(UserRole.USER, UserRole.ADMIN, UserRole.SUPER_ADMIN),
     NotificationController.allNotificationByAdmin
 );
 
