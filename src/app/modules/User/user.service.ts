@@ -4,7 +4,7 @@ import { Prisma, User, UserRole, UserStatus } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import { paginationHelper } from "../../../helpers/paginationHelper";
-import { userSearchAbleFields } from "./user.constant";
+import { safeUserSelect, userSearchAbleFields } from "./user.constant";
 import { TAuthUser } from "../../interfaces/common";
 import AppError from "../../errors/AppError";
 import { StatusCodes } from "http-status-codes";
@@ -38,19 +38,7 @@ const createUser = async (req: Request): Promise<TSafeUser> => {
 
   const createdUserData = await prisma.user.create({
     data: userData,
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      photo: true,
-      contactNumber: true,
-      gender: true,
-      status: true,
-      needPasswordChange: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+    select: safeUserSelect,
   });
 
   return createdUserData;
@@ -80,31 +68,16 @@ const createAdmin = async (req: Request): Promise<TSafeUser> => {
 
   const createdAdminData = await prisma.user.create({
     data: userData,
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      photo: true,
-      contactNumber: true,
-      gender: true,
-      status: true,
-      needPasswordChange: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+    select: safeUserSelect,
   });
 
   return createdAdminData;
 };
 
 const getAllUserFromDB = async (params: any, options: IPaginationOptions) => {
-  // console.log(options)
   const { page, limit, skip } = paginationHelper.calculatePagination(options);
   const { searchTerm, ...filterData } = params;
   const andConditions: Prisma.UserWhereInput[] = [];
-
-  //   console.log(filterData);
 
   if (params.searchTerm) {
     andConditions.push({
@@ -142,6 +115,7 @@ const getAllUserFromDB = async (params: any, options: IPaginationOptions) => {
         : {
             createdAt: "desc",
           },
+    select: safeUserSelect,
   });
 
   const total = await prisma.user.count({
@@ -178,18 +152,21 @@ const myProfile = async (user: TAuthUser) => {
       where: {
         email: userInfo.email,
       },
+      select: safeUserSelect,
     });
   } else if (userInfo?.role === UserRole.ADMIN) {
     profileInfo = await prisma.user.findUnique({
       where: {
         email: userInfo.email,
       },
+      select: safeUserSelect,
     });
   } else if (userInfo?.role === UserRole.USER) {
     profileInfo = await prisma.user.findUnique({
       where: {
         email: userInfo.email,
       },
+      select: safeUserSelect,
     });
   }
 
@@ -201,6 +178,7 @@ const changeProfileStatus = async (id: string, status: UserRole) => {
     where: {
       id,
     },
+    select: safeUserSelect,
   });
 
   const updateUserStatus = await prisma.user.update({
@@ -208,6 +186,7 @@ const changeProfileStatus = async (id: string, status: UserRole) => {
       id,
     },
     data: status,
+    select: safeUserSelect,
   });
 
   return updateUserStatus;
@@ -218,6 +197,7 @@ const updateRole = async (id: string, role: UserRole) => {
     where: {
       id,
     },
+    select: safeUserSelect
   });
 
   const updateRole = await prisma.user.update({
@@ -225,6 +205,7 @@ const updateRole = async (id: string, role: UserRole) => {
       id,
     },
     data: role,
+    select: safeUserSelect
   });
 
   return updateRole;
@@ -247,6 +228,7 @@ const updateMyProfile = async (user: TAuthUser, req: Request) => {
         email: userInfo.email,
       },
       data: req.body,
+      select: safeUserSelect
     });
   } else if (userInfo?.role === UserRole.ADMIN) {
     profileInfo = await prisma.user.update({
@@ -254,6 +236,7 @@ const updateMyProfile = async (user: TAuthUser, req: Request) => {
         email: userInfo.email,
       },
       data: req.body,
+      select: safeUserSelect
     });
   } else if (userInfo?.role === UserRole.USER) {
     profileInfo = await prisma.user.update({
@@ -261,6 +244,7 @@ const updateMyProfile = async (user: TAuthUser, req: Request) => {
         email: userInfo.email,
       },
       data: req.body,
+      select: safeUserSelect
     });
   }
 
