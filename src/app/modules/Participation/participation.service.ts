@@ -1,4 +1,4 @@
-import { ParticipantStatus } from "@prisma/client";
+import { ParticipantStatus, PaymentStatus } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import AppError from "../../errors/AppError";
 import { StatusCodes } from "http-status-codes";
@@ -62,18 +62,37 @@ const createParticipation = async (payload: any, user: any) => {
     where: {
       id: eventId,
     },
+    include: {
+      payment: true,
+    },
   });
+
+  // console.log("event", eventData);
 
   if (!eventData) {
     throw new AppError(StatusCodes.NOT_FOUND, "Event Not Found");
   }
 
-  //   TODO: APPLY YOUR PAYMENT LOGICS
+  if (!eventData.payment) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Payment Info Not Found");
+  }
+
   if (eventData.isPaid) {
-    throw new AppError(
-      StatusCodes.FORBIDDEN,
-      "This is a paid event. Please complete payment to participate."
-    );
+    if (
+      eventData.isPaid &&
+      eventData?.payment.status !== PaymentStatus.SUCCESS
+    ) {
+      switch (eventData.payment?.status) {
+        case PaymentStatus.PENDING:
+          throw new Error("Event is not paid yet");
+
+        case PaymentStatus.FAILED:
+          throw new Error("Event payment failed");
+
+        case PaymentStatus.CANCELLED:
+          throw new Error("Event payment cancelled");
+      }
+    }
   }
 
   const existingParticipant = await prisma.participant.findFirst({
@@ -150,7 +169,7 @@ const cancelParticipation = async (id: any) => {
     },
   });
 
-  console.log(participationData);
+  // console.log(participationData);
 
   if (!participationData) {
     throw new AppError(

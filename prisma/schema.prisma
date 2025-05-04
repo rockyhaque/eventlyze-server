@@ -64,11 +64,10 @@ model Event {
 
   participant Participant[]
 
-  invite       Invite         @relation(fields: [id], references: [id])
-  owner        User           @relation(fields: [ownerId], references: [id])
-  payment      Payment?       @relation(fields: [paymentId], references: [paymentId])
-  review       Review?        @relation(fields: [reviewId], references: [id])
-  Notification Notification[]
+  invite  Invite?  @relation(fields: [inviteId], references: [id])
+  owner   User     @relation(fields: [ownerId], references: [id])
+  payment Payment? @relation(fields: [paymentId], references: [paymentId])
+  review  Review[]
 
   @@map("events")
 }
@@ -110,24 +109,15 @@ model Payment {
 
 // review model
 model Review {
-  id        String   @id @default(uuid())
-  event     Event[]
-  userId    String
-  user      User     @relation(fields: [id], references: [id])
-  content   String
-  rating    Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
+  id      String @id @default(uuid())
+  eventId String
+  userId  String
+  content String
+  rating  Int
 
-model Notification {
-  id        String   @id @default(uuid())
-  userId    String
-  eventId   String
-  message   String
-  read      Boolean  @default(false)
-  user      User     @relation(fields: [userId], references: [id])
-  event     Event    @relation(fields: [eventId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

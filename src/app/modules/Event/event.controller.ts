@@ -15,7 +15,7 @@ interface CustomRequest extends Request {
 const createEvent = catchAsync(async (req: CustomRequest, res:Response) => {
   
     const result = await eventService.createEvent(req.body, req.user);
-    console.log(result);
+    // console.log(result);
     sendResponse(res, {
         statusCode: StatusCodes.OK,
         success: true,
