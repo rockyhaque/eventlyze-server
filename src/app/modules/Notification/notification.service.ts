@@ -74,8 +74,24 @@ const allNotificatoinIntoDB = async (user: JwtPayload): Promise<{
 
 
 // Update notification
-const updateAllNotificatoinIntoDB = async () => {
-    console.log("Update Notification");
+const updateAllNotificatoinIntoDB = async (user: JwtPayload) => {
+
+    console.log(user);
+    
+
+    // Check if user is admin/superadmin
+    if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+        const updateNotificationByAdmin = await prisma.notification.updateMany({
+            where: {
+                read: false
+            },
+            data: {
+                read: true,
+            }
+        });
+
+        return updateNotificationByAdmin;
+    }
 
 }
 

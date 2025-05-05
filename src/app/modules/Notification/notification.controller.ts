@@ -25,15 +25,15 @@ const allNotification = catchAsync(async (req: CustomRequest, res: Response): Pr
 
 
 // Update Notification
-const updateAllNotificatoin = catchAsync(async (req: Request, res: Response): Promise<void> => {
+const updateAllNotificatoin = catchAsync(async (req: CustomRequest, res: Response): Promise<void> => {
 
-    const result = await notificationService.updateAllNotificatoinIntoDB();
+    const result = await notificationService.updateAllNotificatoinIntoDB(req.user);
 
     sendResponse(res, {
         statusCode: StatusCodes.OK,
         success: true,
         // message: result.message,
-        message: "Your notification read succesfully",
+        message: "All notification read succesfully",
         data: result,
     });
 });

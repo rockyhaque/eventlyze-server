@@ -20,6 +20,7 @@ router.get(
 // Update Notification Router
 router.patch(
     "/update-notification",
+    auth(UserRole.USER, UserRole.ADMIN, UserRole.SUPER_ADMIN),
     NotificationController.updateAllNotificatoin
 );
 
