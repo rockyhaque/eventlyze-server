@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "InviteStatus" AS ENUM ('PENDING', 'ACCEPTED', 'REJECTED');
+
+-- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('SUPER_ADMIN', 'ADMIN', 'USER');
 
 -- CreateEnum
@@ -14,10 +17,13 @@ CREATE TYPE "EventStatus" AS ENUM ('UPCOMING', 'CANCELED', 'ONGOING', 'COMPLETED
 CREATE TYPE "EventType" AS ENUM ('ONLINE', 'OFFLINE');
 
 -- CreateEnum
-CREATE TYPE "ParticipantStatus" AS ENUM ('JOINED', 'REQUESTED', 'APPROVED', 'REJECTED');
+CREATE TYPE "ParticipantStatus" AS ENUM ('JOINED', 'REQUESTED', 'APPROVED', 'REJECTED', 'CANCELLED');
 
 -- CreateEnum
 CREATE TYPE "PaymentStatus" AS ENUM ('SUCCESS', 'CANCELLED', 'PENDING', 'COMPLETED', 'FAILED');
+
+-- CreateEnum
+CREATE TYPE "EventCategory" AS ENUM ('MUSIC', 'TECHNOLOGY', 'FOOD_AND_DRINK', 'ARTS', 'BUSINESS', 'SPORTS', 'NETWORKING', 'ENTERTAINMENT', 'PHOTOGRAPHY', 'GAMING', 'TRAVEL', 'EDUCATION');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -54,7 +60,7 @@ CREATE TABLE "events" (
     "isPublic" BOOLEAN NOT NULL DEFAULT false,
     "isPaid" BOOLEAN NOT NULL DEFAULT false,
     "price" INTEGER NOT NULL,
-    "category" TEXT NOT NULL,
+    "category" "EventCategory" NOT NULL,
     "location" TEXT,
     "platform" TEXT,
     "meetingLink" TEXT,
@@ -69,7 +75,6 @@ CREATE TABLE "events" (
     "eventType" "EventType" NOT NULL DEFAULT 'OFFLINE',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "paymentId" TEXT,
     "reviewId" TEXT,
     "ownerId" TEXT NOT NULL,
     "inviteId" TEXT,
@@ -78,12 +83,26 @@ CREATE TABLE "events" (
 );
 
 -- CreateTable
+CREATE TABLE "Notification" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "eventId" TEXT NOT NULL,
+    "message" TEXT NOT NULL,
+    "read" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Notification_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "participants" (
     "id" TEXT NOT NULL,
     "eventId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "status" "ParticipantStatus" NOT NULL DEFAULT 'REQUESTED',
+    "status" "ParticipantStatus",
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "participants_pkey" PRIMARY KEY ("id")
 );
@@ -91,6 +110,9 @@ CREATE TABLE "participants" (
 -- CreateTable
 CREATE TABLE "Invite" (
     "id" TEXT NOT NULL,
+    "eventId" TEXT NOT NULL,
+    "hostId" TEXT NOT NULL,
+    "status" "InviteStatus" NOT NULL DEFAULT 'PENDING',
     "email" TEXT NOT NULL,
 
     CONSTRAINT "Invite_pkey" PRIMARY KEY ("id")
@@ -113,6 +135,7 @@ CREATE TABLE "Payment" (
 -- CreateTable
 CREATE TABLE "Review" (
     "id" TEXT NOT NULL,
+    "eventId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "content" TEXT NOT NULL,
     "rating" INTEGER NOT NULL,
@@ -125,6 +148,9 @@ CREATE TABLE "Review" (
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "Payment_eventId_key" ON "Payment"("eventId");
+
 -- AddForeignKey
 ALTER TABLE "events" ADD CONSTRAINT "events_inviteId_fkey" FOREIGN KEY ("inviteId") REFERENCES "Invite"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
@@ -132,10 +158,10 @@ ALTER TABLE "events" ADD CONSTRAINT "events_inviteId_fkey" FOREIGN KEY ("inviteI
 ALTER TABLE "events" ADD CONSTRAINT "events_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "events" ADD CONSTRAINT "events_paymentId_fkey" FOREIGN KEY ("paymentId") REFERENCES "Payment"("paymentId") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Notification" ADD CONSTRAINT "Notification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "events" ADD CONSTRAINT "events_reviewId_fkey" FOREIGN KEY ("reviewId") REFERENCES "Review"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Notification" ADD CONSTRAINT "Notification_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "events"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "participants" ADD CONSTRAINT "participants_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "events"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -144,7 +170,13 @@ ALTER TABLE "participants" ADD CONSTRAINT "participants_eventId_fkey" FOREIGN KE
 ALTER TABLE "participants" ADD CONSTRAINT "participants_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Payment" ADD CONSTRAINT "Payment_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "events"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Payment" ADD CONSTRAINT "Payment_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Review" ADD CONSTRAINT "Review_id_fkey" FOREIGN KEY ("id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Review" ADD CONSTRAINT "Review_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "events"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Review" ADD CONSTRAINT "Review_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
