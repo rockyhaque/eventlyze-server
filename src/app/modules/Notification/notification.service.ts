@@ -73,6 +73,57 @@ const allNotificatoinIntoDB = async (user: JwtPayload): Promise<{
 };
 
 
+// Update Single notification
+const updateSingleNotificatoinIntoDB = async (user: JwtPayload, id: string) => {
+
+    console.log(user);
+    console.log(id);
+    
+
+
+    // Check if user is admin/superadmin
+    // if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+    //     const updateNotificationByAdmin = await prisma.notification.updateMany({
+    //         where: {
+    //             read: false
+    //         },
+    //         data: {
+    //             read: true
+    //         }
+    //     });
+
+    //     return updateNotificationByAdmin;
+    // }
+
+    // For regular users 
+    // else {
+    //     const existingUser = await prisma.user.findUnique({
+    //         where: {
+    //             email: user.email
+    //         }
+    //     });
+
+    //     if (!existingUser) {
+    //         throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+    //     }
+
+    //     const updateNotificationByUser = await prisma.notification.updateMany({
+    //         where: {
+    //             userId: existingUser?.id,
+    //             readUser: false
+    //         },
+    //         data: {
+    //             readUser: true,
+    //         }
+    //     });
+
+    //     return updateNotificationByUser;
+    // }
+
+}
+
+
+
 // Update notification
 const updateAllNotificatoinIntoDB = async (user: JwtPayload) => {
 
@@ -120,5 +171,6 @@ const updateAllNotificatoinIntoDB = async (user: JwtPayload) => {
 
 export const notificationService = {
     allNotificatoinIntoDB,
-    updateAllNotificatoinIntoDB
+    updateAllNotificatoinIntoDB,
+    updateSingleNotificatoinIntoDB
 }

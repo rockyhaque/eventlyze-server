@@ -17,6 +17,14 @@ router.get(
 );
 
 
+// Update Single Notification Router
+router.patch(
+    "/:id",
+    auth(UserRole.USER, UserRole.ADMIN, UserRole.SUPER_ADMIN),
+    NotificationController.updateSingleNotificatoin
+);
+
+
 // Update Notification Router
 router.patch(
     "/update-notification",
