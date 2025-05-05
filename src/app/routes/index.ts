@@ -52,6 +52,7 @@ const moduleRoutes = [
     path: "/notifications",
     route: NotificationRoutes,
   },
+  {
     path: "/invitation",
     route: InvitationsRoutes ,
   },
