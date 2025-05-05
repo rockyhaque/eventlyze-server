@@ -116,7 +116,7 @@ const updateSingleNotificatoinIntoDB = async (user: JwtPayload, id: string) => {
         return updateNotificationByUser;
     }
 
-}
+};
 
 
 // Update notification
@@ -161,7 +161,7 @@ const updateAllNotificatoinIntoDB = async (user: JwtPayload) => {
         return updateNotificationByUser;
     }
 
-}
+};
 
 
 export const notificationService = {
