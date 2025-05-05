@@ -24,11 +24,11 @@ const createInvitations = catchAsync(async (req: Request & { user?: TAuthUser },
 
 
 const updatStatusInvitations = catchAsync(async (req: Request & { user?: TAuthUser }, res) => {
-  const host =  req.user 
+  const receveruser =  req.user 
  
   
 
-  const result = await InvitationsService.updateStatus();
+  const result = await InvitationsService.updateStatus( req.body,receveruser as TAuthUser);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
