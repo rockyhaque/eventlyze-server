@@ -60,16 +60,16 @@ model Event {
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
 
-  paymentId String?
+ 
   reviewId  String?
   ownerId   String
   inviteId  String?
+  payment    Payment?
 
   participant Participant[]
 
   invite       Invite?        @relation(fields: [inviteId], references: [id])
   owner        User           @relation(fields: [ownerId], references: [id])
-  payment      Payment?       @relation(fields: [paymentId], references: [paymentId])
   review       Review[]
   notification Notification[]
 
@@ -111,14 +111,14 @@ model Invite {
 // payment model
 model Payment {
   paymentId  String        @id
-  eventId    String
+  eventId    String   @unique
   userId     String?
   paymentUrl String
   status     PaymentStatus @default(PENDING)
   amount     Int
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
-  event      Event[]
+  event      Event        @relation(fields: [eventId], references: [id])
   user       User?         @relation(fields: [userId], references: [id])
 }
 
