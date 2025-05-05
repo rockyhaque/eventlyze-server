@@ -25,9 +25,9 @@ const allNotification = catchAsync(async (req: CustomRequest, res: Response): Pr
 
 
 // Update Notification
-const updateNotificatoin = catchAsync(async (req: Request, res: Response): Promise<void> => {
+const updateAllNotificatoin = catchAsync(async (req: Request, res: Response): Promise<void> => {
 
-    const result = await notificationService.updateNotificatoinIntoDB();
+    const result = await notificationService.updateAllNotificatoinIntoDB();
 
     sendResponse(res, {
         statusCode: StatusCodes.OK,
@@ -42,5 +42,5 @@ const updateNotificatoin = catchAsync(async (req: Request, res: Response): Promi
 
 export const NotificationController = {
     allNotification,
-    updateNotificatoin
+    updateAllNotificatoin
 };

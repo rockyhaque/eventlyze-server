@@ -74,7 +74,7 @@ const allNotificatoinIntoDB = async (user: JwtPayload): Promise<{
 
 
 // Update notification
-const updateNotificatoinIntoDB = async () => {
+const updateAllNotificatoinIntoDB = async () => {
     console.log("Update Notification");
 
 }
@@ -82,5 +82,5 @@ const updateNotificatoinIntoDB = async () => {
 
 export const notificationService = {
     allNotificatoinIntoDB,
-    updateNotificatoinIntoDB
+    updateAllNotificatoinIntoDB
 }

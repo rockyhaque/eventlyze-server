@@ -20,7 +20,7 @@ router.get(
 // Update Notification Router
 router.patch(
     "/update-notification",
-    NotificationController.updateNotificatoin
+    NotificationController.updateAllNotificatoin
 );
 
 
