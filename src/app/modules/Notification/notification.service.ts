@@ -5,6 +5,7 @@ import prisma from "../../../shared/prisma";
 import { JwtPayload } from "jsonwebtoken";
 import AppError from "../../errors/AppError";
 import { StatusCodes } from "http-status-codes";
+// import { deleteOldNotifications } from "./notification.utils";
 
 
 // get all notification
@@ -87,6 +88,10 @@ const updateSingleNotificatoinIntoDB = async (user: JwtPayload, id: string) => {
                 read: true
             }
         });
+
+        // const deletedCount = await deleteOldNotifications();
+        // console.log(deletedCount);
+
 
         return updateNotificationByAdmin;
     }
