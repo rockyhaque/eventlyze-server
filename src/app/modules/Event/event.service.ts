@@ -42,7 +42,6 @@ const createEvent = async (data: Event, user: JwtPayload) => {
   if (!existingUser) {
     throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
   }
-
   const result = await prisma.$transaction(async (transactionClient: Prisma.TransactionClient) => {
 
     // Event Create function
