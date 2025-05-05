@@ -38,13 +38,13 @@ model NewsletterSubscriber {
 }
 
 model Event {
-  id                  String      @id @default(uuid())
+  id                  String        @id @default(uuid())
   title               String
   description         String
-  isPublic            Boolean     @default(false)
-  isPaid              Boolean     @default(false)
+  isPublic            Boolean       @default(false)
+  isPaid              Boolean       @default(false)
   price               Int
-  category            EventCategory 
+  category            EventCategory
   location            String?
   platform            String?
   meetingLink         String?
@@ -55,16 +55,15 @@ model Event {
   eventEndTime        DateTime
   seat                Int
   eventBanner         String?
-  status              EventStatus @default(UPCOMING)
-  eventType           EventType   @default(OFFLINE)
-  createdAt           DateTime    @default(now())
-  updatedAt           DateTime    @updatedAt
+  status              EventStatus   @default(UPCOMING)
+  eventType           EventType     @default(OFFLINE)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
 
- 
-  reviewId  String?
-  ownerId   String
-  inviteId  String?
-  payment    Payment?
+  reviewId String?
+  ownerId  String
+  inviteId String?
+  payment  Payment?
 
   participant Participant[]
 
@@ -77,11 +76,12 @@ model Event {
 }
 
 model Notification {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   userId    String
   eventId   String
   message   String
-  read      Boolean  @default(false)
+  read Boolean @default(false)
+  readUser  Boolean @default(false)
   user      User     @relation(fields: [userId], references: [id])
   event     Event    @relation(fields: [eventId], references: [id])
   createdAt DateTime @default(now())
@@ -103,25 +103,25 @@ model Participant {
 }
 
 model Invite {
-  id    String  @id @default(uuid())
+  id      String       @id @default(uuid())
   eventId String
-  hostId String
-  status InviteStatus @default(PENDING)
-  email String
-  event Event[]
+  hostId  String
+  status  InviteStatus @default(PENDING)
+  email   String
+  event   Event[]
 }
 
 // payment model
 model Payment {
   paymentId  String        @id
-  eventId    String   @unique
+  eventId    String        @unique
   userId     String?
   paymentUrl String
   status     PaymentStatus @default(PENDING)
   amount     Int
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
-  event      Event        @relation(fields: [eventId], references: [id])
+  event      Event         @relation(fields: [eventId], references: [id])
   user       User?         @relation(fields: [userId], references: [id])
 }
 
@@ -172,6 +172,7 @@ enum EventStatus {
   CANCELED
   ONGOING
   COMPLETED
+  BANNED
 }
 
 enum EventType {
@@ -185,6 +186,7 @@ enum ParticipantStatus {
   APPROVED
   REJECTED
   CANCELLED
+  BANNED
 }
 
 enum PaymentStatus {
