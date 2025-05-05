@@ -9,7 +9,30 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
+// const createEvent = async (data: Event, user: JwtPayload) => {
+//   const email = user?.email;
+//   const existingUser = await prisma.user.findUnique({
+//     where: { email },
+//     select: { id: true },
+//   });
+
+//   if (!existingUser) {
+//     throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+//   }
+
+//   const event = await prisma.event.create({
+//     data: {
+//       ...data,
+//       ownerId: existingUser.id,
+//     },
+//   });
+
+//   return event;
+// };
+
+
 const createEvent = async (data: Event, user: JwtPayload) => {
+
   const email = user?.email;
   const existingUser = await prisma.user.findUnique({
     where: { email },
@@ -17,19 +40,34 @@ const createEvent = async (data: Event, user: JwtPayload) => {
   });
 
   if (!existingUser) {
-    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+    throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
   }
+  const result = await prisma.$transaction(async (transactionClient: Prisma.TransactionClient) => {
 
-  console.log(data)
-  const event = await prisma.event.create({
-    data: {
-      ...data,
-      ownerId: existingUser.id,
-    },
+    // Event Create function
+    const event = await transactionClient.event.create({
+      data: {
+        ...data,
+        ownerId: existingUser.id,
+      },
+    });
+
+    // Botification Created function
+    await transactionClient.notification.create({
+      data: {
+        userId: existingUser?.id,
+        eventId: event?.id,
+        message: `New ${event?.title} event created by ${email}`
+      }
+    });
+
+    return event;
   });
 
-  return event;
+  return result;
 };
+
+
 
 const parseBoolean = (value: string | undefined): boolean | undefined => {
   if (value === "true") return true;
@@ -91,11 +129,11 @@ const getAllEvents = async (params: any, options: any) => {
     orderBy:
       options.sortBy && options.sortOrder
         ? {
-            [options.sortBy]: options.sortOrder,
-          }
+          [options.sortBy]: options.sortOrder,
+        }
         : {
-            createdAt: "desc",
-          },
+          createdAt: "desc",
+        },
   });
 
   const total = await prisma.Event.count({
