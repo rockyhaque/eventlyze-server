@@ -11,7 +11,6 @@ interface CustomRequest extends Request {
     user?: any;
 }
 
-
 const createEvent = catchAsync(async (req: CustomRequest, res:Response) => {
   
     const result = await eventService.createEvent(req.body, req.user);
@@ -52,6 +51,7 @@ const getEventById = catchAsync(async (req: CustomRequest, res) => {
 
 const updateSingleEvent = catchAsync(async (req: CustomRequest, res) => {
     const { id } = req.params;
+    console.log(id)
     const result = await eventService.updateSingleEvent(id, req.body);
     sendResponse(res, {
         statusCode: StatusCodes.OK,

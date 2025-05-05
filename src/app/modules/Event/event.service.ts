@@ -161,10 +161,16 @@ const getEventById = async (id: string) => {
 };
 
 const updateSingleEvent = async (id: string, data: Partial<Event>) => {
+  console.log(data)
   const event = await prisma.event.update({
     where: { id },
     data,
+    include: {
+      participant: true,
+      review: true,
+    }
   });
+  // console.log(event)
   return event;
 };
 
