@@ -92,32 +92,31 @@ const updateSingleNotificatoinIntoDB = async (user: JwtPayload, id: string) => {
     }
 
     // For regular users 
-    // else {
-    //     const existingUser = await prisma.user.findUnique({
-    //         where: {
-    //             email: user.email
-    //         }
-    //     });
+    else {
+        const existingUser = await prisma.user.findUnique({
+            where: {
+                email: user.email
+            }
+        });
 
-    //     if (!existingUser) {
-    //         throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
-    //     }
+        if (!existingUser) {
+            throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+        }
 
-    //     const updateNotificationByUser = await prisma.notification.updateMany({
-    //         where: {
-    //             userId: existingUser?.id,
-    //             readUser: false
-    //         },
-    //         data: {
-    //             readUser: true,
-    //         }
-    //     });
+        const updateNotificationByUser = await prisma.notification.update({
+            where: {
+                userId: existingUser?.id,
+                id: id
+            },
+            data: {
+                readUser: true,
+            }
+        });
 
-    //     return updateNotificationByUser;
-    // }
+        return updateNotificationByUser;
+    }
 
 }
-
 
 
 // Update notification
