@@ -1,8 +1,9 @@
-import { EventStatus, EventType } from "@prisma/client";
+import { EventCategory, EventStatus, EventType } from "@prisma/client";
 import { z } from "zod";
 
 const EventStatusEnum = z.nativeEnum(EventStatus);
 const EventTypeEnum = z.nativeEnum(EventType);
+const EventCategoryEnum = z.nativeEnum(EventCategory);
 
 export const EventSchema = z.object({
   body: z
@@ -15,7 +16,9 @@ export const EventSchema = z.object({
         .number({ invalid_type_error: "Price must be a number." })
         .int({ message: "Price must be an integer." })
         .nonnegative({ message: "Price cannot be negative." }),
-      category: z.string().min(1, { message: "Category is required." }),
+      category:  EventCategoryEnum.refine((val) => Object.values(EventCategory).includes(val), {
+        message: "Invalid category. Must be one of: conference, meetup, webinar.",
+      }),
       location: z.string().optional().nullable(),
       platform: z.string().optional().nullable(),
       meetingLink: z

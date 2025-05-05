@@ -20,6 +20,7 @@ const createEvent = async (data: Event, user: JwtPayload) => {
     throw new AppError(StatusCodes.NOT_FOUND, "User not found");
   }
 
+  console.log(data)
   const event = await prisma.event.create({
     data: {
       ...data,
