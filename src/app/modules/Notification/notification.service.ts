@@ -3,6 +3,8 @@
 import { Notification } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import { JwtPayload } from "jsonwebtoken";
+import AppError from "../../errors/AppError";
+import { StatusCodes } from "http-status-codes";
 
 
 // get all notification
@@ -13,7 +15,11 @@ const allNotificatoinIntoDB = async (user: JwtPayload): Promise<{
 
     // Check if user is admin/superadmin
     if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
-        const allNotification = await prisma.notification.findMany();
+        const allNotification = await prisma.notification.findMany({
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
 
         const unReadNotification = await prisma.notification.findMany({
             where: {
@@ -36,7 +42,14 @@ const allNotificatoinIntoDB = async (user: JwtPayload): Promise<{
             }
         });
 
+        if (!existingUser) {
+            throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+        }
+
         const allNotificationUser = await prisma.notification.findMany({
+            orderBy: {
+                createdAt: 'desc'
+            },
             where: {
                 userId: existingUser?.id
             }
@@ -45,7 +58,7 @@ const allNotificatoinIntoDB = async (user: JwtPayload): Promise<{
         const unReadUserNotification = await prisma.notification.findMany({
             where: {
                 userId: existingUser?.id,
-                read: false
+                readUser: false as any
             }
         });
 
