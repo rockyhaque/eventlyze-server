@@ -44,7 +44,7 @@ model Event {
   isPublic            Boolean     @default(false)
   isPaid              Boolean     @default(false)
   price               Int
-  category            String
+  category            EventCategory 
   location            String?
   platform            String?
   meetingLink         String?
@@ -193,4 +193,19 @@ enum PaymentStatus {
   PENDING
   COMPLETED
   FAILED
+}
+
+enum EventCategory {
+  MUSIC
+  TECHNOLOGY
+  FOOD_AND_DRINK
+  ARTS
+  BUSINESS
+  SPORTS
+  NETWORKING
+  ENTERTAINMENT
+  PHOTOGRAPHY
+  GAMING
+  TRAVEL
+  EDUCATION
 }
