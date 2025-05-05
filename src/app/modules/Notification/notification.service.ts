@@ -76,8 +76,6 @@ const allNotificatoinIntoDB = async (user: JwtPayload): Promise<{
 // Update notification
 const updateAllNotificatoinIntoDB = async (user: JwtPayload) => {
 
-    console.log(user);
-    
 
     // Check if user is admin/superadmin
     if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
@@ -91,6 +89,31 @@ const updateAllNotificatoinIntoDB = async (user: JwtPayload) => {
         });
 
         return updateNotificationByAdmin;
+    }
+
+    // For regular users 
+    else {
+        const existingUser = await prisma.user.findUnique({
+            where: {
+                email: user.email
+            }
+        });
+
+        if (!existingUser) {
+            throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+        }
+
+        const updateNotificationByUser = await prisma.notification.updateMany({
+            where: {
+                userId: existingUser?.id,
+                readUser: false
+            },
+            data: {
+                readUser: true,
+            }
+        });
+
+        return updateNotificationByUser;
     }
 
 }
