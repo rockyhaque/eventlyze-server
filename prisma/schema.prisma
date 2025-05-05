@@ -104,6 +104,9 @@ model Participant {
 
 model Invite {
   id    String  @id @default(uuid())
+  eventId String
+  hostId String
+  status InviteStatus @default(PENDING)
   email String
   event Event[]
 }
@@ -138,6 +141,12 @@ model Review {
 }
 
 //---------------------- enum---------------------
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
 
 enum UserRole {
   SUPER_ADMIN

@@ -7,6 +7,7 @@ import { adminRoutes } from "../modules/Admin/admin.routes";
 import { ReviewRoutes } from "../modules/Review/review.routes";
 import { ParticipantRoutes } from "../modules/Participation/participation.routes";
 import { SubscriberRoutes } from "../modules/Subscriber/subscriber.routes";
+import { InvitationsRoutes } from "../modules/Invitations/invitaiton.routes";
 
 
 
@@ -44,6 +45,10 @@ const moduleRoutes = [
   {
     path: "/reviews",
     route: ReviewRoutes,
+  },
+  {
+    path: "/invitation",
+    route: InvitationsRoutes ,
   },
 ];
 
