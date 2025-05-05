@@ -15,7 +15,7 @@ const createInvitations = catchAsync(async (req: Request & { user?: TAuthUser },
 
   const result = await InvitationsService.createInvitations(req.body,host as TAuthUser);
   sendResponse(res, {
-    statusCode: StatusCodes.OK,
+    statusCode: StatusCodes.CREATED,
     success: true,
     message: "invitations Created Successfully!",
     data: result,
@@ -32,7 +32,30 @@ const updatStatusInvitations = catchAsync(async (req: Request & { user?: TAuthUs
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
-    message: "invitations Created Successfully!",
+    message: "invitations update Successfully!",
+    data: result,
+  });
+});
+
+const getallInvitations = catchAsync(async (req: Request , res) => {
+  
+  const result = await InvitationsService.getallInvitations()
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "All  invitations get successuflly!",
+    data: result,
+  });
+});
+
+const gethostallInvtiations = catchAsync(async (req: Request & { user?: TAuthUser }, res) => {
+  const receveruser =  req.user 
+ 
+  const result = await InvitationsService.gethostallInvtiations(receveruser as TAuthUser);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Get host all  invitations get successuflly!",
     data: result,
   });
 });
@@ -45,5 +68,7 @@ const updatStatusInvitations = catchAsync(async (req: Request & { user?: TAuthUs
 export const InvitationsController = {
   createInvitations,
   updatStatusInvitations,
+  getallInvitations,
+  gethostallInvtiations,
 
 };

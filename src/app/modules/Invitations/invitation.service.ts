@@ -31,13 +31,7 @@ const createInvitations = async (data:any,host:TAuthUser) => {
     throw new AppError(StatusCodes.NOT_FOUND,"You have not created any events yet.")
    }
 
-      
-
    const invitation = await prisma.$transaction(async (prismaClient) => {
-
-
-
-
 
       const newinvition = await prismaClient.invite.create({
         data:{
@@ -78,7 +72,35 @@ const updateStatus = async(payload:any,receverUser:TAuthUser) => {
    return updateInvitation;
 }
 
+const getallInvitations = async() => {
+  const allinvitations = await  prisma.invite.findMany();
+  return allinvitations;
+}
+
+const gethostallInvtiations = async(payload:TAuthUser) => {
+  const isExistuser = await  prisma.user.findUnique({
+    where:{
+      email:payload?.email
+    }
+  })
+
+  if(!isExistuser) {
+    throw new AppError(StatusCodes.NOT_FOUND,"User not found.")
+  }
+
+  const allinvitations = await  prisma.invite.findMany({
+    where:{
+      hostId:isExistuser?.id
+    }
+  });
+  return allinvitations;
+}
+
+
+
 export const InvitationsService = {
   createInvitations ,
   updateStatus,
+  getallInvitations,
+  gethostallInvtiations,
 }
