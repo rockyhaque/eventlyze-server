@@ -72,14 +72,15 @@ const allNotificatoinIntoDB = async (user: JwtPayload): Promise<{
     }
 };
 
-// User all notification
-const allNotificatoinByUserIntoDB = async () => {
-    console.log("user Notification");
+
+// Update notification
+const updateNotificatoinIntoDB = async () => {
+    console.log("Update Notification");
 
 }
 
 
 export const notificationService = {
     allNotificatoinIntoDB,
-    allNotificatoinByUserIntoDB
+    updateNotificatoinIntoDB
 }

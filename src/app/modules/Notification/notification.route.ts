@@ -17,10 +17,10 @@ router.get(
 );
 
 
-// All Notification Route By User
-router.get(
-    "/user-notification",
-    NotificationController.allNotificationByUser
+// Update Notification Router
+router.patch(
+    "/update-notification",
+    NotificationController.updateNotificatoin
 );
 
 
