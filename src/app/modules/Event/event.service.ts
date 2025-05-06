@@ -2,33 +2,11 @@ import { Event, Prisma } from "@prisma/client";
 import { JwtPayload } from "jsonwebtoken";
 import { StatusCodes } from "http-status-codes";
 import AppError from "../../errors/AppError";
-import { run } from "node:test";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 import { eventSearchAbleFields } from "./event.constant";
 const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
-
-// const createEvent = async (data: Event, user: JwtPayload) => {
-//   const email = user?.email;
-//   const existingUser = await prisma.user.findUnique({
-//     where: { email },
-//     select: { id: true },
-//   });
-
-//   if (!existingUser) {
-//     throw new AppError(StatusCodes.NOT_FOUND, "User not found");
-//   }
-
-//   const event = await prisma.event.create({
-//     data: {
-//       ...data,
-//       ownerId: existingUser.id,
-//     },
-//   });
-
-//   return event;
-// };
 
 
 const createEvent = async (data: Event, user: JwtPayload) => {
@@ -69,11 +47,11 @@ const createEvent = async (data: Event, user: JwtPayload) => {
 
 
 
-const parseBoolean = (value: string | undefined): boolean | undefined => {
-  if (value === "true") return true;
-  if (value === "false") return false;
-  return undefined;
-};
+// const parseBoolean = (value: string | undefined): boolean | undefined => {
+//   if (value === "true") return true;
+//   if (value === "false") return false;
+//   return undefined;
+// };
 
 const getAllEvents = async (params: any, options: any) => {
   // console.log(options)

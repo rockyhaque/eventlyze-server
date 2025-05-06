@@ -73,14 +73,14 @@ const createParticipation = async (payload: any, user: any) => {
     throw new AppError(StatusCodes.NOT_FOUND, "Event Not Found");
   }
 
-  if (!eventData.payment) {
-    throw new AppError(StatusCodes.NOT_FOUND, "Payment Info Not Found");
-  }
+  // if (!eventData.payment) {
+  //   throw new AppError(StatusCodes.NOT_FOUND, "Payment Info Not Found");
+  // }
 
   if (eventData.isPaid) {
     if (
       eventData.isPaid &&
-      eventData?.payment.status !== PaymentStatus.SUCCESS
+      eventData?.payment?.status !== PaymentStatus.SUCCESS
     ) {
       switch (eventData.payment?.status) {
         case PaymentStatus.PENDING:
