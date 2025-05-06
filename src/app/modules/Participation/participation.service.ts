@@ -1,4 +1,8 @@
-import { EventCategory, ParticipantStatus, PaymentStatus } from "@prisma/client";
+import {
+  EventCategory,
+  ParticipantStatus,
+  PaymentStatus,
+} from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import AppError from "../../errors/AppError";
 import { StatusCodes } from "http-status-codes";
@@ -57,7 +61,7 @@ const getJoinedEventCategoryCount = async () => {
     categoryCounts[category]++;
   });
 
-  return categoryCounts
+  return categoryCounts;
 };
 
 const getJoinedAllEventsByAdmin = async () => {
@@ -96,31 +100,14 @@ const createParticipation = async (payload: any, user: any) => {
     },
   });
 
-  // console.log("event", eventData);
 
   if (!eventData) {
     throw new AppError(StatusCodes.NOT_FOUND, "Event Not Found");
   }
 
-  // if (!eventData.payment) {
-  //   throw new AppError(StatusCodes.NOT_FOUND, "Payment Info Not Found");
-  // }
-
   if (eventData.isPaid) {
-    if (
-      eventData.isPaid &&
-      eventData?.payment?.status !== PaymentStatus.SUCCESS
-    ) {
-      switch (eventData.payment?.status) {
-        case PaymentStatus.PENDING:
-          throw new Error("Event is not paid yet");
-
-        case PaymentStatus.FAILED:
-          throw new Error("Event payment failed");
-
-        case PaymentStatus.CANCELLED:
-          throw new Error("Event payment cancelled");
-      }
+    if (!eventData?.payment) {
+      throw new AppError(StatusCodes.FORBIDDEN, "Event is not paid yet");
     }
   }
 

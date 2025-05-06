@@ -8,9 +8,7 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
-
 const createEvent = async (data: Event, user: JwtPayload) => {
-
   const email = user?.email;
   const existingUser = await prisma.user.findUnique({
     where: { email },
@@ -18,47 +16,43 @@ const createEvent = async (data: Event, user: JwtPayload) => {
   });
 
   if (!existingUser) {
-    throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
   }
-  const result = await prisma.$transaction(async (transactionClient: Prisma.TransactionClient) => {
+  const result = await prisma.$transaction(
+    async (transactionClient: Prisma.TransactionClient) => {
+      // Event Create function
+      const event = await transactionClient.event.create({
+        data: {
+          ...data,
+          ownerId: existingUser.id,
+        },
+      });
 
-    // Event Create function
-    const event = await transactionClient.event.create({
-      data: {
-        ...data,
-        ownerId: existingUser.id,
-      },
-    });
+      // Botification Created function
+      await transactionClient.notification.create({
+        data: {
+          userId: existingUser?.id,
+          eventId: event?.id,
+          message: `New ${event?.title} event created by ${email}`,
+        },
+      });
 
-    // Botification Created function
-    await transactionClient.notification.create({
-      data: {
-        userId: existingUser?.id,
-        eventId: event?.id,
-        message: `New ${event?.title} event created by ${email}`
-      }
-    });
-
-    return event;
-  });
+      return event;
+    }
+  );
 
   return result;
 };
 
 
-// const parseBoolean = (value: string | undefined): boolean | undefined => {
-//   if (value === "true") return true;
-//   if (value === "false") return false;
-//   return undefined;
-// };
-
 const getAllEvents = async (params: any, options: any) => {
   // console.log(options)
   const { page, limit, skip } = paginationHelper.calculatePagination(options);
   const { searchTerm, ...filterData } = params;
+
   const andConditions: Prisma.EventWhereInput[] = [];
 
-  if (params.searchTerm) {
+  if (searchTerm) {
     andConditions.push({
       OR: eventSearchAbleFields.map((field) => ({
         [field]: {
@@ -67,9 +61,6 @@ const getAllEvents = async (params: any, options: any) => {
         },
       })),
     });
-  }
-
-  if (Object.keys(filterData).length > 0) {
   }
 
   //   For spesific field filter
@@ -81,19 +72,24 @@ const getAllEvents = async (params: any, options: any) => {
         if (value === "true") value = true;
         if (value === "false") value = false;
 
-        if (typeof value === "boolean") {
-          return { [key]: value };
-        } else {
-          return { [key]: { equals: value } };
+        // if (typeof value === "boolean") {
+        //   return { [key]: value };
+        // } else {
+        //   return { [key]: { equals: value } };
+        // }
+
+        // Convert number fields
+        if (["price", "seat"].includes(key)) {
+          value = Number(value);
         }
+
+        return { [key]: { equals: value } };
       }),
     });
   }
 
   const whereConditions: Prisma.EventWhereInput =
     andConditions.length > 0 ? { AND: andConditions } : {};
-
-  console.dir(whereConditions, { depth: null });
 
   const result = await prisma.Event.findMany({
     where: whereConditions,
@@ -106,16 +102,17 @@ const getAllEvents = async (params: any, options: any) => {
     orderBy:
       options.sortBy && options.sortOrder
         ? {
-          [options.sortBy]: options.sortOrder,
-        }
+            [options.sortBy]: options.sortOrder,
+          }
         : {
-          createdAt: "desc",
-        },
+            createdAt: "desc",
+          },
   });
 
   const total = await prisma.Event.count({
     where: whereConditions,
   });
+
   return {
     meta: {
       page,
@@ -138,14 +135,14 @@ const getEventById = async (id: string) => {
 };
 
 const updateSingleEvent = async (id: string, data: Partial<Event>) => {
-  console.log(data)
+  console.log(data);
   const event = await prisma.event.update({
     where: { id },
     data,
     include: {
       participant: true,
       review: true,
-    }
+    },
   });
   // console.log(event)
   return event;
