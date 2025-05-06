@@ -74,7 +74,7 @@ const allNotificatoinIntoDB = async (user: JwtPayload): Promise<{
 };
 
 
-// Update Single notification
+// Update Single notifications
 const updateSingleNotificatoinIntoDB = async (user: JwtPayload, id: string) => {
 
 
