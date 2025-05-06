@@ -1,4 +1,4 @@
-import { ParticipantStatus, PaymentStatus } from "@prisma/client";
+import { EventCategory, ParticipantStatus, PaymentStatus } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import AppError from "../../errors/AppError";
 import { StatusCodes } from "http-status-codes";
@@ -29,6 +29,35 @@ const getJoinedEventsByUser = async (user: any) => {
   }
 
   return joinedEvents;
+};
+
+const getJoinedEventCategoryCount = async () => {
+  const joinedParticipants = await prisma.participant.findMany({
+    where: {
+      status: ParticipantStatus.JOINED,
+    },
+    select: {
+      event: {
+        select: {
+          category: true,
+        },
+      },
+    },
+  });
+
+  // Initialize all categories with 0
+  const categoryCounts: Record<string, number> = {};
+  for (const category of Object.values(EventCategory)) {
+    categoryCounts[category] = 0;
+  }
+
+  // Count actual participants per category
+  joinedParticipants.forEach((p) => {
+    const category = p.event.category;
+    categoryCounts[category]++;
+  });
+
+  return categoryCounts
 };
 
 const getJoinedAllEventsByAdmin = async () => {
@@ -194,4 +223,5 @@ export const participantService = {
   getJoinedAllEventsByAdmin,
   createParticipation,
   cancelParticipation,
+  getJoinedEventCategoryCount,
 };

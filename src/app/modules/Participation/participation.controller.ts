@@ -21,6 +21,18 @@ const getJoinedEventsByUser = catchAsync(
   }
 );
 
+const getJoinedEventCategoryCount = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await participantService.getJoinedEventCategoryCount();
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "Joined events category fetched successfully",
+      data: result,
+    });
+  }
+);
+
 const getJoinedAllEventsByAdmin = catchAsync(
   async (req: Request, res: Response) => {
     const result = await participantService.getJoinedAllEventsByAdmin();
@@ -49,24 +61,21 @@ const createParticipantion = catchAsync(
   }
 );
 
-const cancelParticipation = catchAsync(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const result = await participantService.cancelParticipation(
-        id
-    );
-    sendResponse(res, {
-      statusCode: StatusCodes.OK,
-      success: true,
-      message: "Participant Cancelled Successfully!",
-      data: result,
-    });
-  }
-);
+const cancelParticipation = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await participantService.cancelParticipation(id);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Participant Cancelled Successfully!",
+    data: result,
+  });
+});
 
 export const participationController = {
   getJoinedEventsByUser,
+  getJoinedEventCategoryCount,
   getJoinedAllEventsByAdmin,
   createParticipantion,
-  cancelParticipation
+  cancelParticipation,
 };
