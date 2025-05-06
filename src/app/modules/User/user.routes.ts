@@ -6,7 +6,7 @@ import auth from "../../middlewares/auth";
 import { UserRole } from "@prisma/client";
 import validateRequest from "../../middlewares/validationRequest";
 const router = express.Router();
-// demo
+
 router.get(
   "/all-users",
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
@@ -18,6 +18,8 @@ router.get(
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.USER),
   UserController.myProfile
 );
+
+router.get("/stats", auth(UserRole.USER), UserController.getUserStats)
 
 router.post(
   "/create-user",

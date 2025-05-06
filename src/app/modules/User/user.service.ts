@@ -74,6 +74,72 @@ const createAdmin = async (req: Request): Promise<TSafeUser> => {
   return createdAdminData;
 };
 
+const getUserStats = async (user: any) => {
+
+
+  const userInfo = await prisma.user.findUnique({
+    where: {
+      email: user.email,
+    },
+    select: safeUserSelect,
+  });
+
+  if (!userInfo || userInfo.status !== "ACTIVE") {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found or inactive");
+  }
+
+  // Events created by the user (based on ownerId)
+  const userEvents = await prisma.event.findMany({
+    where: {
+      ownerId: userInfo.id,
+    },
+    select: {
+      id: true,
+      status: true,
+    },
+  });
+
+  const userEventIds = userEvents.map((event) => event.id);
+
+  // Total events created
+  const totalEvents = userEvents.length;
+
+  // Total Event Attendees
+  const eventAttendees = await prisma.participant.count({
+    where: {
+      eventId: { in: userEventIds },
+    },
+  });
+
+  // Upcoming Events
+  const upcomingEvents = userEvents.filter(
+    (event) => event.status === "UPCOMING"
+  ).length;
+
+  // Average Rating
+  const userEventReviews = await prisma.review.findMany({
+    where: {
+      eventId: { in: userEventIds },
+    },
+  });
+
+  let eventRating = "0.0";
+  if (userEventReviews.length > 0) {
+    const totalRating = userEventReviews.reduce((sum, r) => sum + r.rating, 0);
+    eventRating = (totalRating / userEventReviews.length).toFixed(1);
+  }
+
+  // Final result return
+  const stats = {
+    totalEvents,
+    eventAttendees,
+    upcomingEvents,
+    eventRating,
+  };
+
+  return stats;
+};
+
 const getAllUserFromDB = async (params: any, options: IPaginationOptions) => {
   const { page, limit, skip } = paginationHelper.calculatePagination(options);
   const { searchTerm, ...filterData } = params;
@@ -197,7 +263,7 @@ const updateRole = async (id: string, role: UserRole) => {
     where: {
       id,
     },
-    select: safeUserSelect
+    select: safeUserSelect,
   });
 
   const updateRole = await prisma.user.update({
@@ -205,7 +271,7 @@ const updateRole = async (id: string, role: UserRole) => {
       id,
     },
     data: role,
-    select: safeUserSelect
+    select: safeUserSelect,
   });
 
   return updateRole;
@@ -228,7 +294,7 @@ const updateMyProfile = async (user: TAuthUser, req: Request) => {
         email: userInfo.email,
       },
       data: req.body,
-      select: safeUserSelect
+      select: safeUserSelect,
     });
   } else if (userInfo?.role === UserRole.ADMIN) {
     profileInfo = await prisma.user.update({
@@ -236,7 +302,7 @@ const updateMyProfile = async (user: TAuthUser, req: Request) => {
         email: userInfo.email,
       },
       data: req.body,
-      select: safeUserSelect
+      select: safeUserSelect,
     });
   } else if (userInfo?.role === UserRole.USER) {
     profileInfo = await prisma.user.update({
@@ -244,7 +310,7 @@ const updateMyProfile = async (user: TAuthUser, req: Request) => {
         email: userInfo.email,
       },
       data: req.body,
-      select: safeUserSelect
+      select: safeUserSelect,
     });
   }
 
@@ -254,6 +320,7 @@ const updateMyProfile = async (user: TAuthUser, req: Request) => {
 export const UserService = {
   createUser,
   createAdmin,
+  getUserStats,
   getAllUserFromDB,
   myProfile,
   changeProfileStatus,
