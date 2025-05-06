@@ -24,16 +24,32 @@ const allNotification = catchAsync(async (req: CustomRequest, res: Response): Pr
 });
 
 
-// All Notification by user
-const allNotificationByUser = catchAsync(async (req: Request, res: Response): Promise<void> => {
+// Update Single Notification
+const updateSingleNotificatoin = catchAsync(async (req: CustomRequest, res: Response): Promise<void> => {
 
-    const result = await notificationService.allNotificatoinByUserIntoDB();
+    const { id } = req.params;
+
+    const result = await notificationService.updateSingleNotificatoinIntoDB(req.user, id);
 
     sendResponse(res, {
         statusCode: StatusCodes.OK,
         success: true,
         // message: result.message,
-        message: "Get All User Notification succesfully",
+        message: "This notification read succesfully",
+        data: result,
+    });
+});
+
+// Update Notification
+const updateAllNotificatoin = catchAsync(async (req: CustomRequest, res: Response): Promise<void> => {
+
+    const result = await notificationService.updateAllNotificatoinIntoDB(req.user);
+
+    sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        // message: result.message,
+        message: "All notification read succesfully",
         data: result,
     });
 });
@@ -42,5 +58,6 @@ const allNotificationByUser = catchAsync(async (req: Request, res: Response): Pr
 
 export const NotificationController = {
     allNotification,
-    allNotificationByUser
+    updateAllNotificatoin,
+    updateSingleNotificatoin
 };

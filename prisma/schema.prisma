@@ -76,12 +76,12 @@ model Event {
 }
 
 model Notification {
-  id        String  @id @default(uuid())
+  id        String   @id @default(uuid())
   userId    String
   eventId   String
   message   String
-  read Boolean @default(false)
-  readUser  Boolean @default(false)
+  read      Boolean  @default(false)
+  readUser  Boolean  @default(false)
   user      User     @relation(fields: [userId], references: [id])
   event     Event    @relation(fields: [eventId], references: [id])
   createdAt DateTime @default(now())

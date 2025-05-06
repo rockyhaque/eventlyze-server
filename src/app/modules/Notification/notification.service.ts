@@ -3,6 +3,9 @@
 import { Notification } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import { JwtPayload } from "jsonwebtoken";
+import AppError from "../../errors/AppError";
+import { StatusCodes } from "http-status-codes";
+// import { deleteOldNotifications } from "./notification.utils";
 
 
 // get all notification
@@ -13,7 +16,11 @@ const allNotificatoinIntoDB = async (user: JwtPayload): Promise<{
 
     // Check if user is admin/superadmin
     if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
-        const allNotification = await prisma.notification.findMany();
+        const allNotification = await prisma.notification.findMany({
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
 
         const unReadNotification = await prisma.notification.findMany({
             where: {
@@ -36,7 +43,14 @@ const allNotificatoinIntoDB = async (user: JwtPayload): Promise<{
             }
         });
 
+        if (!existingUser) {
+            throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+        }
+
         const allNotificationUser = await prisma.notification.findMany({
+            orderBy: {
+                createdAt: 'desc'
+            },
             where: {
                 userId: existingUser?.id
             }
@@ -45,7 +59,7 @@ const allNotificatoinIntoDB = async (user: JwtPayload): Promise<{
         const unReadUserNotification = await prisma.notification.findMany({
             where: {
                 userId: existingUser?.id,
-                read: false
+                readUser: false as any
             }
         });
 
@@ -59,14 +73,104 @@ const allNotificatoinIntoDB = async (user: JwtPayload): Promise<{
     }
 };
 
-// User all notification
-const allNotificatoinByUserIntoDB = async () => {
-    console.log("user Notification");
 
-}
+// Update Single notifications
+const updateSingleNotificatoinIntoDB = async (user: JwtPayload, id: string) => {
+
+
+    // Check if user is admin/superadmin
+    if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+        const updateNotificationByAdmin = await prisma.notification.update({
+            where: {
+                id: id
+            },
+            data: {
+                read: true
+            }
+        });
+
+        // const deletedCount = await deleteOldNotifications();
+        // console.log(deletedCount);
+
+
+        return updateNotificationByAdmin;
+    }
+
+    // For regular users 
+    else {
+        const existingUser = await prisma.user.findUnique({
+            where: {
+                email: user.email
+            }
+        });
+
+        if (!existingUser) {
+            throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+        }
+
+        const updateNotificationByUser = await prisma.notification.update({
+            where: {
+                userId: existingUser?.id,
+                id: id
+            },
+            data: {
+                readUser: true,
+            }
+        });
+
+        return updateNotificationByUser;
+    }
+
+};
+
+
+// Update notification
+const updateAllNotificatoinIntoDB = async (user: JwtPayload) => {
+
+    // Check if user is admin/superadmin
+    if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+        const updateNotificationByAdmin = await prisma.notification.updateMany({
+            where: {
+                read: false
+            },
+            data: {
+                read: true
+            }
+        });
+
+        return updateNotificationByAdmin;
+    }
+
+    // For regular users 
+    else {
+        const existingUser = await prisma.user.findUnique({
+            where: {
+                email: user.email
+            }
+        });
+
+        if (!existingUser) {
+            throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+        }
+
+        const updateNotificationByUser = await prisma.notification.updateMany({
+            where: {
+                userId: existingUser?.id,
+                readUser: false
+            },
+            data: {
+                readUser: true,
+            }
+        });
+
+        return updateNotificationByUser;
+    }
+
+};
 
 
 export const notificationService = {
     allNotificatoinIntoDB,
-    allNotificatoinByUserIntoDB
+    updateAllNotificatoinIntoDB,
+    updateSingleNotificatoinIntoDB
 }

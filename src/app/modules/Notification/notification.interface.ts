@@ -6,4 +6,5 @@ export interface TNotification {
     eventId: string
     message: string;
     read: boolean;
+    readUser: boolean;
 }
