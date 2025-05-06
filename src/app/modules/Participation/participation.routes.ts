@@ -12,6 +12,12 @@ router.get(
 );
 
 router.get(
+  "/joined-event-category-stats",
+  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.USER),
+  participationController.getJoinedEventCategoryCount
+);
+
+router.get(
   "/joined-all-events",
   auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
   participationController.getJoinedAllEventsByAdmin
