@@ -27,6 +27,17 @@ const createAdmin = catchAsync(async (req, res) => {
   });
 });
 
+const getUserStats = catchAsync(async(req: Request & { user?: TAuthUser }, res: Response) => {
+  const user = req.user;
+  const result = await UserService.getUserStats(user);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "User Stats retrieved Successfully!",
+    data: result,
+  });
+})
+
 const getAllUserFromDB = catchAsync(async (req: Request, res: Response) => {
   const filters = pick(req.query, userFilterableFields);
   const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
@@ -99,6 +110,7 @@ const updateMyProfile = catchAsync(
 export const UserController = {
   createUser,
   createAdmin,
+  getUserStats,
   getAllUserFromDB,
   myProfile,
   changeProfileStatus,

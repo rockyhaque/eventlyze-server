@@ -5,13 +5,20 @@ import { StatusCodes } from "http-status-codes";
 import { safeUserSelect } from "../User/user.constant";
 
 const getAdminStats = async (user: any) => {
-  const totalEvents = (await prisma.event.findMany()).length;
+  // Total Event Count
+  const totalEvents = await prisma.event.count();
+
+  // Total Event Attendies
+  const totalParticipants = await prisma.participant.count();
+
+  // Upcoming Events
   const upcomingEvents = await prisma.event.count({
     where: {
       status: "UPCOMING",
     },
   });
 
+  // Recent Subscribers
   const allSubscribers = await prisma.newsletterSubscriber.findMany({
     orderBy: {
       createdAt: "desc",
@@ -19,11 +26,24 @@ const getAdminStats = async (user: any) => {
     take: 6,
   });
 
+  // Average Rating
+  const allReviews = await prisma.review.findMany();
+  let eventRating = "0.0";
+
+  if (allReviews.length > 0) {
+    const totalRating = allReviews.reduce(
+      (sum, review) => sum + review.rating,
+      0
+    );
+    eventRating = (totalRating / allReviews.length).toFixed(1);
+  }
+
+  // Final result return
   const stats = {
     totalEvents,
-    eventAttendees: 145, // Static
+    eventAttendees: totalParticipants,
     upcomingEvents,
-    eventRating: 4.6, // Static
+    eventRating,
     recentSubscribers: allSubscribers,
   };
 
