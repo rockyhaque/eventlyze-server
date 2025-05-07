@@ -20,7 +20,7 @@ const createEvent = async (data: Event, user: JwtPayload) => {
   }
   const result = await prisma.$transaction(
     async (transactionClient: Prisma.TransactionClient) => {
-      // Event Create function
+      // Event Create func
       const event = await transactionClient.event.create({
         data: {
           ...data,
