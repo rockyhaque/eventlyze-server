@@ -117,6 +117,7 @@ model Payment {
   eventId    String        @unique
   userId     String?
   paymentUrl String
+  transactionId String?
   status     PaymentStatus @default(PENDING)
   amount     Int
   createdAt  DateTime      @default(now())
