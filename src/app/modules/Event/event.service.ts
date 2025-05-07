@@ -4,9 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import AppError from "../../errors/AppError";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 import { eventFilterableFields, eventSearchAbleFields } from "./event.constant";
-import dayjs from "dayjs";
 const { PrismaClient } = require("@prisma/client");
-
 
 const prisma = new PrismaClient();
 
@@ -46,8 +44,6 @@ const createEvent = async (data: Event, user: JwtPayload) => {
   return result;
 };
 
-
-
 const getAllEvents = async (params: any, options: any) => {
   const { page, limit, skip } = paginationHelper.calculatePagination(options);
   const { searchTerm, ...restParams } = params;
@@ -66,10 +62,8 @@ const getAllEvents = async (params: any, options: any) => {
     });
   }
 
-  // Filtering logic
-  const allowedStatuses = ["UPCOMING", "ONGOING"];
+  // Filter logic
   const filterData: any = {};
-
   for (const key of eventFilterableFields) {
     if (key in restParams) {
       let value = restParams[key];
@@ -78,13 +72,7 @@ const getAllEvents = async (params: any, options: any) => {
       if (value === "false") value = false;
       if (["price", "seat"].includes(key)) value = Number(value);
 
-      if (key === "status") {
-        if (allowedStatuses.includes(value)) {
-          filterData[key] = value;
-        }
-      } else if (key !== "dateFilter") {
-        filterData[key] = value;
-      }
+      filterData[key] = value;
     }
   }
 
@@ -93,50 +81,6 @@ const getAllEvents = async (params: any, options: any) => {
       AND: Object.entries(filterData).map(([key, value]) => ({
         [key]: { equals: value },
       })),
-    });
-  }
-
-  // Date filter logic (based on eventStartTime)
-  const currentDate = dayjs();
-  if ("dateFilter" in restParams) {
-    let startDate: Date | null = null;
-    let endDate: Date | null = null;
-
-    switch (restParams.dateFilter) {
-      case "today":
-        startDate = currentDate.startOf("day").toDate();
-        endDate = currentDate.endOf("day").toDate();
-        break;
-      case "tomorrow":
-        startDate = currentDate.add(1, "day").startOf("day").toDate();
-        endDate = currentDate.add(1, "day").endOf("day").toDate();
-        break;
-      case "thisWeek":
-        startDate = currentDate.startOf("week").toDate();
-        endDate = currentDate.endOf("week").toDate();
-        break;
-      case "thisMonth":
-        startDate = currentDate.startOf("month").toDate();
-        endDate = currentDate.endOf("month").toDate();
-        break;
-    }
-
-    if (startDate && endDate) {
-      andConditions.push({
-        eventStartTime: {
-          gte: startDate,
-          lte: endDate,
-        },
-      });
-    }
-  }
-
-  // Enforce upcoming/ongoing if status not explicitly filtered
-  if (!("status" in filterData)) {
-    andConditions.push({
-      status: {
-        in: allowedStatuses,
-      },
     });
   }
 
@@ -157,9 +101,7 @@ const getAllEvents = async (params: any, options: any) => {
         : { createdAt: "desc" },
   });
 
-  const total = await prisma.event.count({
-    where: whereConditions,
-  });
+  const total = await prisma.event.count({ where: whereConditions });
 
   return {
     meta: { page, limit, total },
