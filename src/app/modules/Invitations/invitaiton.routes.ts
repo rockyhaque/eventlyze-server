@@ -16,7 +16,7 @@ router.post(
 );
 
 router.patch(
-  '/updateStatus',
+  '/update-status',
   auth(UserRole.USER),
   InvitationsController.updatStatusInvitations
 )
