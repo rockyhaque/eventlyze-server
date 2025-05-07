@@ -1,5 +1,6 @@
 import { Event, EventCategory, EventStatus, Prisma } from "@prisma/client";
 import { JwtPayload } from "jsonwebtoken";
+import { isBefore, isWithinInterval } from "date-fns";
 import { StatusCodes } from "http-status-codes";
 import AppError from "../../errors/AppError";
 import { paginationHelper } from "../../../helpers/paginationHelper";
@@ -18,22 +19,42 @@ const createEvent = async (data: Event, user: JwtPayload) => {
   if (!existingUser) {
     throw new AppError(StatusCodes.NOT_FOUND, "User not found");
   }
+
+  const now = new Date();
+
+  // Use date-fns to determine status
+  let status: EventStatus;
+  if (isBefore(data.eventEndTime, now)) {
+    status = EventStatus.COMPLETED;
+  } else if (
+    isWithinInterval(now, {
+      start: data.eventStartTime,
+      end: data.eventEndTime,
+    })
+  ) {
+    status = EventStatus.ONGOING;
+  } else {
+    status = EventStatus.UPCOMING;
+  }
+
+  // Destructure to ignore status from incoming data
+  const { status: _ignoredStatus, ...restData } = data;
+
   const result = await prisma.$transaction(
     async (transactionClient: Prisma.TransactionClient) => {
-      // Event Create func
       const event = await transactionClient.event.create({
         data: {
-          ...data,
+          ...restData,
           ownerId: existingUser.id,
+          status,
         },
       });
 
-      // Botification Created function
       await transactionClient.notification.create({
         data: {
-          userId: existingUser?.id,
-          eventId: event?.id,
-          message: `New ${event?.title} event created by ${email}`,
+          userId: existingUser.id,
+          eventId: event.id,
+          message: `New ${event.title} event created by ${email}`,
         },
       });
 
@@ -120,9 +141,6 @@ const getEventById = async (id: string) => {
   return event;
 };
 
-
-
-
 const getEventCategoryCount = async () => {
   // Fetch all events and their categories
   const events = await prisma.event.findMany({
@@ -142,11 +160,10 @@ const getEventCategoryCount = async () => {
     categoryCounts[event.category]++;
   });
 
-  console.log(categoryCounts)
+  console.log(categoryCounts);
 
   return categoryCounts;
 };
-
 
 const updateSingleEvent = async (id: string, data: Partial<Event>) => {
   console.log(data);
@@ -169,28 +186,28 @@ const deleteSingleEvent = async (id: string) => {
   return event;
 };
 
-const bannedEvent = async(id: string) => {
+const bannedEvent = async (id: string) => {
   const eventData = await prisma.event.findUnique({
     where: {
-      id
-    }
-  })
+      id,
+    },
+  });
 
-  if(!eventData){
-    throw new AppError(StatusCodes.NOT_FOUND, "Event Not Found")
+  if (!eventData) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Event Not Found");
   }
 
   const bannedEvent = await prisma.event.update({
     where: {
-      id: eventData.id
+      id: eventData.id,
     },
     data: {
-      status: EventStatus.BANNED
-    }
-  })
+      status: EventStatus.BANNED,
+    },
+  });
 
-  return bannedEvent
-}
+  return bannedEvent;
+};
 
 export const eventService = {
   createEvent,
@@ -199,5 +216,5 @@ export const eventService = {
   getEventCategoryCount,
   updateSingleEvent,
   deleteSingleEvent,
-  bannedEvent
+  bannedEvent,
 };

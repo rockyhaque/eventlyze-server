@@ -56,7 +56,6 @@ const getEventCategoryCount = catchAsync(
   }
 );
 
-
 const updateSingleEvent = catchAsync(async (req: CustomRequest, res) => {
   const { id } = req.params;
   console.log(id);
