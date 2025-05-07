@@ -67,10 +67,23 @@ const deleteSingleEvent = catchAsync(async (req: CustomRequest, res) => {
   });
 });
 
+const bannedEvent = catchAsync(async (req: CustomRequest, res) => {
+  const { id } = req.params;
+  const result = await eventService.bannedEvent(id);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Event banned successfully!",
+    data: result,
+  });
+});
+
+
 export const eventController = {
   createEvent,
   getEvents,
   getEventById,
   updateSingleEvent,
   deleteSingleEvent,
+  bannedEvent
 };
