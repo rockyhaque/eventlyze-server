@@ -17,7 +17,8 @@ export const deleteOldNotifications = async () => {
             readUser: true,
             updatedAt: {
                 // lte: sevenDaysAgo
-                lte: twoMinutesAgo            }
+                lte: twoMinutesAgo
+            }
         }
     });
 
