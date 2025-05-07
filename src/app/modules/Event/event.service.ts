@@ -1,10 +1,9 @@
-import { Event, EventStatus, Prisma } from "@prisma/client";
+import { Event, EventCategory, EventStatus, Prisma } from "@prisma/client";
 import { JwtPayload } from "jsonwebtoken";
 import { StatusCodes } from "http-status-codes";
 import AppError from "../../errors/AppError";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 import { eventFilterableFields, eventSearchAbleFields } from "./event.constant";
-import { date } from "zod";
 const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
@@ -44,7 +43,6 @@ const createEvent = async (data: Event, user: JwtPayload) => {
 
   return result;
 };
-
 
 const getAllEvents = async (params: any, options: any) => {
   const { page, limit, skip } = paginationHelper.calculatePagination(options);
@@ -122,6 +120,34 @@ const getEventById = async (id: string) => {
   return event;
 };
 
+
+
+
+const getEventCategoryCount = async () => {
+  // Fetch all events and their categories
+  const events = await prisma.event.findMany({
+    select: {
+      category: true,
+    },
+  });
+
+  // Initialize all categories with 0
+  const categoryCounts: Record<string, number> = {};
+  for (const category of Object.values(EventCategory)) {
+    categoryCounts[category] = 0;
+  }
+
+  // Count how many events belong to each category
+  events.forEach((event: any) => {
+    categoryCounts[event.category]++;
+  });
+
+  console.log(categoryCounts)
+
+  return categoryCounts;
+};
+
+
 const updateSingleEvent = async (id: string, data: Partial<Event>) => {
   console.log(data);
   const event = await prisma.event.update({
@@ -143,7 +169,6 @@ const deleteSingleEvent = async (id: string) => {
   return event;
 };
 
-// only admin can banned event
 const bannedEvent = async(id: string) => {
   const eventData = await prisma.event.findUnique({
     where: {
@@ -171,6 +196,7 @@ export const eventService = {
   createEvent,
   getAllEvents,
   getEventById,
+  getEventCategoryCount,
   updateSingleEvent,
   deleteSingleEvent,
   bannedEvent
