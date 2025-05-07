@@ -7,6 +7,7 @@ import { Request, Response } from "express";
 import { UserService } from "../User/user.service";
 import AppError from "../../errors/AppError";
 import { UserRole } from "@prisma/client";
+import { DashboardService } from "./dashboard.service";
 
 const getAdminStats = catchAsync(
   async (req: Request & { user?: TAuthUser }, res: Response) => {
@@ -61,8 +62,22 @@ const getStatsBasedOnRole = catchAsync(
   }
 );
 
+const getChartData = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const user = req.user;
+    const result = await DashboardService.getChartData(user);
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "Bar Chart retrieved Successfully!",
+      data: result,
+    });
+  }
+);
+
 export const DashboardController = {
   getStatsBasedOnRole,
   getAdminStats, // Optional
   getUserStats, // Optional
+  getChartData,
 };

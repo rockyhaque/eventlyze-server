@@ -44,6 +44,19 @@ const getEventById = catchAsync(async (req: CustomRequest, res) => {
   });
 });
 
+const getEventCategoryCount = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await eventService.getEventCategoryCount();
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "Event category counts fetched successfully",
+      data: result,
+    });
+  }
+);
+
+
 const updateSingleEvent = catchAsync(async (req: CustomRequest, res) => {
   const { id } = req.params;
   console.log(id);
@@ -83,6 +96,7 @@ export const eventController = {
   createEvent,
   getEvents,
   getEventById,
+  getEventCategoryCount,
   updateSingleEvent,
   deleteSingleEvent,
   bannedEvent

@@ -72,10 +72,25 @@ const cancelParticipation = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const bannedParticipation = catchAsync(async (req: Request & { user?: TAuthUser }, res: Response) => {
+  const { id } = req.params;
+  const user = req.user;
+  const result = await participantService.bannedParticipation(id, user as TAuthUser);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Participant Banned Successfully!",
+    data: result,
+  });
+});
+
+
+
 export const participationController = {
   getJoinedEventsByUser,
   getJoinedEventCategoryCount,
   getJoinedAllEventsByAdmin,
   createParticipantion,
   cancelParticipation,
+  bannedParticipation
 };
