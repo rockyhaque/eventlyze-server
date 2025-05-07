@@ -10,7 +10,7 @@ router.get('/all-invitations',auth(UserRole.ADMIN,UserRole.SUPER_ADMIN),Invitati
 router.get('/all-host-invitations',auth(UserRole.USER), InvitationsController.gethostallInvtiations)
 
 router.post(
-  "/",
+  "/:eventId",
   auth(UserRole.USER),
   InvitationsController.createInvitations
 );
