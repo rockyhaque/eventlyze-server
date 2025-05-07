@@ -50,7 +50,10 @@ const createAdmin = async (req: Request): Promise<TSafeUser> => {
     email: req.body.email,
     password: hashedPassword,
     role: UserRole.ADMIN,
+    name: req.body.name,
     photo: req.body.photo,
+    contactNumber: req.body.contactNumber,
+    gender: req.body.gender,
   };
 
   const existingAdmin = await prisma.user.findUnique({
