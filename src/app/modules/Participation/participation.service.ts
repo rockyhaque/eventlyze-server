@@ -143,28 +143,28 @@ const createParticipation = async (payload: any, user: any) => {
   }
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
-      const createdParticipant = await prisma.participant.create({
-        data: {
-          eventId,
-          userId: userData.id,
-        },
-      });
+    let status: ParticipantStatus;
 
-      const updatedParticipantStatus = await tx.participant.update({
-        where: {
-          id: createdParticipant.id,
-        },
-        data: {
-          status: ParticipantStatus.JOINED,
-        },
-        include: {
-          event: true,
-          user: true,
-        },
-      });
-      return updatedParticipantStatus;
+    if (eventData.isPublic && !eventData.isPaid) {
+      // Public + Free → Instant join
+      status = ParticipantStatus.JOINED;
+    } else {
+      // All others → Request first (payment handled elsewhere)
+      status = ParticipantStatus.REQUESTED;
+    }
+
+    const result = await prisma.participant.create({
+      data: {
+        eventId,
+        userId: userData.id,
+        status,
+      },
+      include: {
+        event: true,
+        user: true,
+      },
     });
+
     return result;
   } catch (error) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Error creating participant");
@@ -228,7 +228,10 @@ const bannedParticipation = async (id: string, user: TAuthUser) => {
   }
 
   if (participant.status === ParticipantStatus.BANNED) {
-    throw new AppError(StatusCodes.BAD_REQUEST, "Participant is already banned");
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Participant is already banned"
+    );
   }
 
   // Check if the logged-in user is the owner of the event
@@ -248,7 +251,6 @@ const bannedParticipation = async (id: string, user: TAuthUser) => {
       status: ParticipantStatus.BANNED,
     },
   });
-
 
   return updatedParticipant;
 };
