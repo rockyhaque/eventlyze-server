@@ -3,7 +3,7 @@ import { JwtPayload } from "jsonwebtoken";
 import { StatusCodes } from "http-status-codes";
 import AppError from "../../errors/AppError";
 import { paginationHelper } from "../../../helpers/paginationHelper";
-import { eventSearchAbleFields } from "./event.constant";
+import { eventFilterableFields, eventSearchAbleFields } from "./event.constant";
 const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
@@ -46,52 +46,49 @@ const createEvent = async (data: Event, user: JwtPayload) => {
 
 
 const getAllEvents = async (params: any, options: any) => {
-  // console.log(options)
   const { page, limit, skip } = paginationHelper.calculatePagination(options);
-  const { searchTerm, ...filterData } = params;
+  const { searchTerm, ...restParams } = params;
 
   const andConditions: Prisma.EventWhereInput[] = [];
 
+  // Search logic
   if (searchTerm) {
     andConditions.push({
       OR: eventSearchAbleFields.map((field) => ({
         [field]: {
-          contains: params.searchTerm,
+          contains: searchTerm,
           mode: "insensitive",
         },
       })),
     });
   }
 
-  //   For spesific field filter
+  // Filter logic
+  const filterData: any = {};
+  for (const key of eventFilterableFields) {
+    if (key in restParams) {
+      let value = restParams[key];
+
+      if (value === "true") value = true;
+      if (value === "false") value = false;
+      if (["price", "seat"].includes(key)) value = Number(value);
+
+      filterData[key] = value;
+    }
+  }
+
   if (Object.keys(filterData).length > 0) {
     andConditions.push({
-      AND: Object.keys(filterData).map((key) => {
-        let value = (filterData as any)[key];
-
-        if (value === "true") value = true;
-        if (value === "false") value = false;
-
-        // if (typeof value === "boolean") {
-        //   return { [key]: value };
-        // } else {
-        //   return { [key]: { equals: value } };
-        // }
-
-        // Convert number fields
-        if (["price", "seat"].includes(key)) {
-          value = Number(value);
-        }
-
-        return { [key]: { equals: value } };
-      }),
+      AND: Object.entries(filterData).map(([key, value]) => ({
+        [key]: { equals: value },
+      })),
     });
   }
 
   const whereConditions: Prisma.EventWhereInput =
     andConditions.length > 0 ? { AND: andConditions } : {};
 
-  const result = await prisma.Event.findMany({
+  const result = await prisma.event.findMany({
     where: whereConditions,
     include: {
       participant: true,
@@ -101,24 +98,14 @@ const getAllEvents = async (params: any, options: any) => {
     take: limit,
     orderBy:
       options.sortBy && options.sortOrder
-        ? {
-            [options.sortBy]: options.sortOrder,
-          }
-        : {
-            createdAt: "desc",
-          },
+        ? { [options.sortBy]: options.sortOrder }
+        : { createdAt: "desc" },
   });
 
-  const total = await prisma.Event.count({
-    where: whereConditions,
-  });
+  const total = await prisma.event.count({ where: whereConditions });
 
   return {
-    meta: {
-      page,
-      limit,
-      total,
-    },
+    meta: { page, limit, total },
     data: result,
   };
 };
