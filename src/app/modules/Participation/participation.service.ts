@@ -1,7 +1,6 @@
 import {
   EventCategory,
   ParticipantStatus,
-  PaymentStatus,
 } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import AppError from "../../errors/AppError";

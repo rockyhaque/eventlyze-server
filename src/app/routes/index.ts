@@ -9,9 +9,7 @@ import { ParticipantRoutes } from "../modules/Participation/participation.routes
 import { SubscriberRoutes } from "../modules/Subscriber/subscriber.routes";
 import { NotificationRoutes } from "../modules/Notification/notification.route";
 import { InvitationsRoutes } from "../modules/Invitations/invitaiton.routes";
-
-
-
+import { DashboardRoutes } from "../modules/Dashboard/dashboard.routes";
 
 const router = express.Router();
 
@@ -54,7 +52,11 @@ const moduleRoutes = [
   },
   {
     path: "/invitation",
-    route: InvitationsRoutes ,
+    route: InvitationsRoutes,
+  },
+  {
+    path: "/dashboard",
+    route: DashboardRoutes,
   },
 ];
 

@@ -1,9 +1,10 @@
-import { Event, Prisma } from "@prisma/client";
+import { Event, EventStatus, Prisma } from "@prisma/client";
 import { JwtPayload } from "jsonwebtoken";
 import { StatusCodes } from "http-status-codes";
 import AppError from "../../errors/AppError";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 import { eventFilterableFields, eventSearchAbleFields } from "./event.constant";
+import { date } from "zod";
 const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
@@ -142,10 +143,35 @@ const deleteSingleEvent = async (id: string) => {
   return event;
 };
 
+// only admin can banned event
+const bannedEvent = async(id: string) => {
+  const eventData = await prisma.event.findUnique({
+    where: {
+      id
+    }
+  })
+
+  if(!eventData){
+    throw new AppError(StatusCodes.NOT_FOUND, "Event Not Found")
+  }
+
+  const bannedEvent = await prisma.event.update({
+    where: {
+      id: eventData.id
+    },
+    data: {
+      status: EventStatus.BANNED
+    }
+  })
+
+  return bannedEvent
+}
+
 export const eventService = {
   createEvent,
   getAllEvents,
   getEventById,
   updateSingleEvent,
   deleteSingleEvent,
+  bannedEvent
 };
