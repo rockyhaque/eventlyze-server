@@ -1,10 +1,8 @@
-import {
-  EventCategory,
-  ParticipantStatus,
-} from "@prisma/client";
+import { EventCategory, ParticipantStatus } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import AppError from "../../errors/AppError";
 import { StatusCodes } from "http-status-codes";
+import { TAuthUser } from "../../interfaces/common";
 
 const getJoinedEventsByUser = async (user: any) => {
   const userData = await prisma.user.findUnique({
@@ -98,7 +96,6 @@ const createParticipation = async (payload: any, user: any) => {
       payment: true,
     },
   });
-
 
   if (!eventData) {
     throw new AppError(StatusCodes.NOT_FOUND, "Event Not Found");
@@ -204,10 +201,63 @@ const cancelParticipation = async (id: any) => {
   return result;
 };
 
+const bannedParticipation = async (id: string, user: TAuthUser) => {
+  // Get the user from DB
+  const userData = await prisma.user.findUnique({
+    where: {
+      email: user?.email,
+    },
+  });
+
+  if (!userData) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
+
+  // Get the participant record
+  const participant = await prisma.participant.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      event: true,
+    },
+  });
+
+  if (!participant) {
+    throw new AppError(StatusCodes.NOT_FOUND, "You haven't participated yet");
+  }
+
+  if (participant.status === ParticipantStatus.BANNED) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Participant is already banned");
+  }
+
+  // Check if the logged-in user is the owner of the event
+  if (participant.event.ownerId !== userData.id) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      "Only the event creator can ban participants"
+    );
+  }
+
+  // Update the participant's status to BANNED
+  const updatedParticipant = await prisma.participant.update({
+    where: {
+      id,
+    },
+    data: {
+      status: ParticipantStatus.BANNED,
+    },
+  });
+
+
+  return updatedParticipant;
+};
+
 export const participantService = {
   getJoinedEventsByUser,
   getJoinedAllEventsByAdmin,
   createParticipation,
   cancelParticipation,
   getJoinedEventCategoryCount,
+  bannedParticipation,
 };

@@ -35,4 +35,10 @@ router.delete(
   participationController.cancelParticipation
 );
 
+router.delete(
+  "/banned-participation/:id",
+  auth(UserRole.USER),
+  participationController.bannedParticipation
+);
+
 export const ParticipantRoutes = router;
