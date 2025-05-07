@@ -2,6 +2,8 @@ import { StatusCodes } from "http-status-codes";
 import prisma from "../../../shared/prisma";
 import { safeUserSelect } from "../User/user.constant";
 import AppError from "../../errors/AppError";
+import { startOfYear, endOfYear } from "date-fns";
+import { UserRole } from "@prisma/client";
 
 const getAdminStats = async (user: any) => {
   // Total Event Count
@@ -113,7 +115,79 @@ const getUserStats = async (user: any) => {
   return stats;
 };
 
+const getChartData = async (user: any) => {
+  const userData = await prisma.user.findUnique({
+    where: {
+      email: user.email,
+    },
+    select: safeUserSelect,
+  });
+
+  if (!userData) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User Not Found");
+  }
+
+  const yearStart = startOfYear(new Date());
+  const yearEnd = endOfYear(new Date());
+
+  const findEvents = await prisma.event.findMany();
+  if (!findEvents) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Event Not Found");
+  }
+
+  const isAdmin =
+    userData.role === UserRole.ADMIN || userData.role === UserRole.SUPER_ADMIN;
+
+  const events = await prisma.event.findMany({
+    where: {
+      ...(isAdmin ? {} : { ownerId: userData.id }),
+      createdAt: {
+        gte: yearStart,
+        lte: yearEnd,
+      },
+    },
+    select: {
+      createdAt: true,
+    },
+  });
+
+  const totalEventsCreated = events.length;
+
+  const monthCountMap: Record<string, number> = {
+    January: 0,
+    February: 0,
+    March: 0,
+    April: 0,
+    May: 0,
+    June: 0,
+    July: 0,
+    August: 0,
+    September: 0,
+    October: 0,
+    November: 0,
+    December: 0,
+  };
+
+  for (const event of events) {
+    const monthName = event.createdAt.toLocaleString("default", {
+      month: "long",
+    });
+    monthCountMap[monthName]++;
+  }
+
+  const chartData = Object.entries(monthCountMap).map(([month, event]) => ({
+    month,
+    event,
+  }));
+
+  return {
+    totalEventsCreated,
+    chartData,
+  };
+};
+
 export const DashboardService = {
   getAdminStats,
-  getUserStats
+  getUserStats,
+  getChartData,
 };

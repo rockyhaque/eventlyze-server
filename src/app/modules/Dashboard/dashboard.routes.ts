@@ -9,5 +9,10 @@ router.get(
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.USER),
   DashboardController.getStatsBasedOnRole
 );
+router.get(
+  "/chart",
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.USER),
+  DashboardController.getChartData
+);
 
 export const DashboardRoutes = router;
