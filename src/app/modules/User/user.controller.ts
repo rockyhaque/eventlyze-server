@@ -53,6 +53,19 @@ const getAllUserFromDB = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getSingleUserFromDB = catchAsync(async (req: Request, res: Response) => {
+  const {id} = req.params;
+
+  const result = await UserService.getSingleUserFromDB(id);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "User retrieved successfully!",
+    data: result,
+  });
+});
+
 const myProfile = catchAsync(
   async (req: Request & { user?: TAuthUser }, res: Response) => {
     const user = req.user;
@@ -112,6 +125,7 @@ export const UserController = {
   createAdmin,
   getUserStats,
   getAllUserFromDB,
+  getSingleUserFromDB,
   myProfile,
   changeProfileStatus,
   updateRole,
