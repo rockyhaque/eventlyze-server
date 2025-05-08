@@ -14,7 +14,7 @@ router.get(
 );
 
 router.get(
-  "/:id",
+  "/specific/:id",
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.USER),
   UserController.getSingleUserFromDB
 );
@@ -24,6 +24,8 @@ router.get(
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.USER),
   UserController.myProfile
 );
+
+
 
 router.get("/stats", auth(UserRole.USER), UserController.getUserStats);
 
