@@ -101,6 +101,14 @@ const createParticipation = async (payload: any, user: any) => {
     throw new AppError(StatusCodes.NOT_FOUND, "Event Not Found");
   }
 
+  //  Prevent creator from joining their own event
+  if (eventData.ownerId === userData.id) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      "You cannot join your own event."
+    );
+  }
+
   if (eventData.isPaid) {
     if (!eventData?.payment) {
       throw new AppError(StatusCodes.FORBIDDEN, "Event is not paid yet");
