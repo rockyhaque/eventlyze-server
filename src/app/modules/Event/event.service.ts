@@ -221,7 +221,6 @@ const myCreatedEvents = async (user: TAuthUser) => {
   if (myEvents.length === 0) {
     throw new AppError(StatusCodes.NOT_FOUND, "No events created by this user");
   }
-  
 
   return myEvents;
 };
@@ -265,9 +264,26 @@ const updateSingleEvent = async (id: string, data: Partial<Event>) => {
 };
 
 const deleteSingleEvent = async (id: string) => {
+  const eventData = await prisma.event.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!eventData) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Event not found");
+  }
+
+  await prisma.notification.deleteMany({
+    where: {
+      eventId: eventData.id,
+    },
+  });
+
   const event = await prisma.event.delete({
     where: { id },
   });
+
   return event;
 };
 
