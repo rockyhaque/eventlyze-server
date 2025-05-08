@@ -27,16 +27,18 @@ const createAdmin = catchAsync(async (req, res) => {
   });
 });
 
-const getUserStats = catchAsync(async(req: Request & { user?: TAuthUser }, res: Response) => {
-  const user = req.user;
-  const result = await UserService.getUserStats(user);
-  sendResponse(res, {
-    statusCode: StatusCodes.OK,
-    success: true,
-    message: "User Stats retrieved Successfully!",
-    data: result,
-  });
-})
+const getUserStats = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const user = req.user;
+    const result = await UserService.getUserStats(user);
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "User Stats retrieved Successfully!",
+      data: result,
+    });
+  }
+);
 
 const getAllUserFromDB = catchAsync(async (req: Request, res: Response) => {
   const filters = pick(req.query, userFilterableFields);
@@ -50,6 +52,19 @@ const getAllUserFromDB = catchAsync(async (req: Request, res: Response) => {
     message: "Users data retrieved successfully!",
     meta: result.meta,
     data: result.data,
+  });
+});
+
+const getSingleUserFromDB = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const result = await UserService.getSingleUserFromDB(id);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "User retrieved successfully!",
+    data: result,
   });
 });
 
@@ -112,6 +127,7 @@ export const UserController = {
   createAdmin,
   getUserStats,
   getAllUserFromDB,
+  getSingleUserFromDB,
   myProfile,
   changeProfileStatus,
   updateRole,

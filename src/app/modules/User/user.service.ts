@@ -50,7 +50,10 @@ const createAdmin = async (req: Request): Promise<TSafeUser> => {
     email: req.body.email,
     password: hashedPassword,
     role: UserRole.ADMIN,
+    name: req.body.name,
     photo: req.body.photo,
+    contactNumber: req.body.contactNumber,
+    gender: req.body.gender,
   };
 
   const existingAdmin = await prisma.user.findUnique({
@@ -75,8 +78,6 @@ const createAdmin = async (req: Request): Promise<TSafeUser> => {
 };
 
 const getUserStats = async (user: any) => {
-
-
   const userInfo = await prisma.user.findUnique({
     where: {
       email: user.email,
@@ -197,46 +198,35 @@ const getAllUserFromDB = async (params: any, options: IPaginationOptions) => {
   };
 };
 
+const getSingleUserFromDB = async (id: string) => {
+  const userData = prisma.user.findUnique({
+    where: {
+      id,
+    },
+    select: safeUserSelect,
+  });
+
+  if (!userData) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
+
+  return userData;
+};
+
 const myProfile = async (user: TAuthUser) => {
-  const userInfo = await prisma.user.findUnique({
+  const profile = await prisma.user.findUnique({
     where: {
       email: user?.email,
       status: UserStatus.ACTIVE,
     },
-    select: {
-      id: true,
-      email: true,
-      role: true,
-      needPasswordChange: true,
-      status: true,
-    },
+    select: safeUserSelect,
   });
 
-  let profileInfo;
-  if (userInfo?.role === UserRole.SUPER_ADMIN) {
-    profileInfo = await prisma.user.findUnique({
-      where: {
-        email: userInfo.email,
-      },
-      select: safeUserSelect,
-    });
-  } else if (userInfo?.role === UserRole.ADMIN) {
-    profileInfo = await prisma.user.findUnique({
-      where: {
-        email: userInfo.email,
-      },
-      select: safeUserSelect,
-    });
-  } else if (userInfo?.role === UserRole.USER) {
-    profileInfo = await prisma.user.findUnique({
-      where: {
-        email: userInfo.email,
-      },
-      select: safeUserSelect,
-    });
+  if (!profile) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Active user not found");
   }
 
-  return { ...userInfo, ...profileInfo };
+  return profile;
 };
 
 const changeProfileStatus = async (id: string, status: UserRole) => {
@@ -322,6 +312,7 @@ export const UserService = {
   createAdmin,
   getUserStats,
   getAllUserFromDB,
+  getSingleUserFromDB,
   myProfile,
   changeProfileStatus,
   updateRole,

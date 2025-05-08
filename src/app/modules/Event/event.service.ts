@@ -1,12 +1,11 @@
 import { Event, EventCategory, EventStatus, Prisma } from "@prisma/client";
 import { JwtPayload } from "jsonwebtoken";
+import { isBefore, isWithinInterval } from "date-fns";
 import { StatusCodes } from "http-status-codes";
 import AppError from "../../errors/AppError";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 import { eventFilterableFields, eventSearchAbleFields } from "./event.constant";
-import dayjs from "dayjs";
 const { PrismaClient } = require("@prisma/client");
-
 
 const prisma = new PrismaClient();
 
@@ -20,22 +19,42 @@ const createEvent = async (data: Event, user: JwtPayload) => {
   if (!existingUser) {
     throw new AppError(StatusCodes.NOT_FOUND, "User not found");
   }
+
+  const now = new Date();
+
+  // Use date-fns to determine status
+  let status: EventStatus;
+  if (isBefore(data.eventEndTime, now)) {
+    status = EventStatus.COMPLETED;
+  } else if (
+    isWithinInterval(now, {
+      start: data.eventStartTime,
+      end: data.eventEndTime,
+    })
+  ) {
+    status = EventStatus.ONGOING;
+  } else {
+    status = EventStatus.UPCOMING;
+  }
+
+  // Destructure to ignore status from incoming data
+  const { status: _ignoredStatus, ...restData } = data;
+
   const result = await prisma.$transaction(
     async (transactionClient: Prisma.TransactionClient) => {
-      // Event Create function
       const event = await transactionClient.event.create({
         data: {
-          ...data,
+          ...restData,
           ownerId: existingUser.id,
+          status,
         },
       });
 
-      // Botification Created function
       await transactionClient.notification.create({
         data: {
-          userId: existingUser?.id,
-          eventId: event?.id,
-          message: `New ${event?.title} event created by ${email}`,
+          userId: existingUser.id,
+          eventId: event.id,
+          message: `New ${event.title} event created by ${email}`,
         },
       });
 
@@ -45,8 +64,6 @@ const createEvent = async (data: Event, user: JwtPayload) => {
 
   return result;
 };
-
-
 
 const getAllEvents = async (params: any, options: any) => {
   const { page, limit, skip } = paginationHelper.calculatePagination(options);
@@ -66,10 +83,8 @@ const getAllEvents = async (params: any, options: any) => {
     });
   }
 
-  // Filtering logic
-  const allowedStatuses = ["UPCOMING", "ONGOING"];
+  // Filter logic
   const filterData: any = {};
-
   for (const key of eventFilterableFields) {
     if (key in restParams) {
       let value = restParams[key];
@@ -78,13 +93,7 @@ const getAllEvents = async (params: any, options: any) => {
       if (value === "false") value = false;
       if (["price", "seat"].includes(key)) value = Number(value);
 
-      if (key === "status") {
-        if (allowedStatuses.includes(value)) {
-          filterData[key] = value;
-        }
-      } else if (key !== "dateFilter") {
-        filterData[key] = value;
-      }
+      filterData[key] = value;
     }
   }
 
@@ -96,50 +105,6 @@ const getAllEvents = async (params: any, options: any) => {
     });
   }
 
-  // Date filter logic (based on eventStartTime)
-  const currentDate = dayjs();
-  if ("dateFilter" in restParams) {
-    let startDate: Date | null = null;
-    let endDate: Date | null = null;
-
-    switch (restParams.dateFilter) {
-      case "today":
-        startDate = currentDate.startOf("day").toDate();
-        endDate = currentDate.endOf("day").toDate();
-        break;
-      case "tomorrow":
-        startDate = currentDate.add(1, "day").startOf("day").toDate();
-        endDate = currentDate.add(1, "day").endOf("day").toDate();
-        break;
-      case "thisWeek":
-        startDate = currentDate.startOf("week").toDate();
-        endDate = currentDate.endOf("week").toDate();
-        break;
-      case "thisMonth":
-        startDate = currentDate.startOf("month").toDate();
-        endDate = currentDate.endOf("month").toDate();
-        break;
-    }
-
-    if (startDate && endDate) {
-      andConditions.push({
-        eventStartTime: {
-          gte: startDate,
-          lte: endDate,
-        },
-      });
-    }
-  }
-
-  // Enforce upcoming/ongoing if status not explicitly filtered
-  if (!("status" in filterData)) {
-    andConditions.push({
-      status: {
-        in: allowedStatuses,
-      },
-    });
-  }
-
   const whereConditions: Prisma.EventWhereInput =
     andConditions.length > 0 ? { AND: andConditions } : {};
 
@@ -147,7 +112,24 @@ const getAllEvents = async (params: any, options: any) => {
     where: whereConditions,
     include: {
       participant: true,
-      review: true,
+      review: {
+        include: {
+          user: {
+            select: {
+              name: true,
+              email: true,
+              photo: true
+            },
+          },
+        },
+      },
+      owner: {
+        select: {
+          name: true,
+          email: true,
+          photo: true
+        },
+      }
     },
     skip,
     take: limit,
@@ -157,9 +139,7 @@ const getAllEvents = async (params: any, options: any) => {
         : { createdAt: "desc" },
   });
 
-  const total = await prisma.event.count({
-    where: whereConditions,
-  });
+  const total = await prisma.event.count({ where: whereConditions });
 
   return {
     meta: { page, limit, total },
@@ -172,14 +152,28 @@ const getEventById = async (id: string) => {
     where: { id },
     include: {
       participant: true,
-      review: true,
+      review: {
+        include: {
+          user: {
+            select: {
+              name: true,
+              email: true,
+              photo: true
+            },
+          },
+        },
+      },
+      owner: {
+        select: {
+          name: true,
+          email: true,
+          photo: true
+        },
+      }
     },
   });
   return event;
 };
-
-
-
 
 const getEventCategoryCount = async () => {
   // Fetch all events and their categories
@@ -200,11 +194,10 @@ const getEventCategoryCount = async () => {
     categoryCounts[event.category]++;
   });
 
-  console.log(categoryCounts)
+  console.log(categoryCounts);
 
   return categoryCounts;
 };
-
 
 const updateSingleEvent = async (id: string, data: Partial<Event>) => {
   console.log(data);
@@ -227,28 +220,28 @@ const deleteSingleEvent = async (id: string) => {
   return event;
 };
 
-const bannedEvent = async(id: string) => {
+const bannedEvent = async (id: string) => {
   const eventData = await prisma.event.findUnique({
     where: {
-      id
-    }
-  })
+      id,
+    },
+  });
 
-  if(!eventData){
-    throw new AppError(StatusCodes.NOT_FOUND, "Event Not Found")
+  if (!eventData) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Event Not Found");
   }
 
   const bannedEvent = await prisma.event.update({
     where: {
-      id: eventData.id
+      id: eventData.id,
     },
     data: {
-      status: EventStatus.BANNED
-    }
-  })
+      status: EventStatus.BANNED,
+    },
+  });
 
-  return bannedEvent
-}
+  return bannedEvent;
+};
 
 export const eventService = {
   createEvent,
@@ -257,5 +250,5 @@ export const eventService = {
   getEventCategoryCount,
   updateSingleEvent,
   deleteSingleEvent,
-  bannedEvent
+  bannedEvent,
 };

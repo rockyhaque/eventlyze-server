@@ -55,7 +55,7 @@ model Event {
   eventEndTime        DateTime
   seat                Int
   eventBanner         String?
-  status              EventStatus   @default(UPCOMING)
+  status              EventStatus   
   eventType           EventType     @default(OFFLINE)
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
@@ -117,6 +117,7 @@ model Payment {
   eventId    String        @unique
   userId     String?
   paymentUrl String
+  transactionId String?
   status     PaymentStatus @default(PENDING)
   amount     Int
   createdAt  DateTime      @default(now())

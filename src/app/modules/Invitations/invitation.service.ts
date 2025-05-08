@@ -1,8 +1,8 @@
-import { JwtHeader } from "jsonwebtoken";
 import { TAuthUser } from "../../interfaces/common";
 import prisma from "../../../shared/prisma";
 import AppError from "../../errors/AppError";
 import { StatusCodes } from "http-status-codes";
+import { InviteStatus, ParticipantStatus } from "@prisma/client";
 
 const createInvitations = async (
   email: string,
@@ -66,28 +66,82 @@ const createInvitations = async (
   return invitation;
 };
 
-const updateStatus = async (payload: any, receverUser: TAuthUser) => {
-  const isExist = await prisma.invite.findFirst({
+// update status and paticipation creation automatically without any payment confirmation
+const updateStatus = async (payload: any, receiverUser: TAuthUser) => {
+  const hostUser = await prisma.user.findUnique({
     where: {
-      id: payload.invitationId,
-      email: receverUser?.email,
+      email: receiverUser?.email,
     },
   });
 
-  if (!isExist) {
+  if (!hostUser) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Event Creator not found.");
+  }
+
+  const invitationData = await prisma.invite.findUnique({
+    where: {
+      id: payload.invitationId,
+    },
+  });
+
+  if (!invitationData) {
     throw new AppError(StatusCodes.NOT_FOUND, "Invitation not found.");
   }
 
-  const updateInvitation = await prisma.invite.update({
+  if (invitationData.hostId !== hostUser.id) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      "You are not allowed to update this invitation."
+    );
+  }
+
+  if (invitationData.status === InviteStatus.ACCEPTED) {
+    throw new AppError(StatusCodes.FORBIDDEN, "Already invitation accepted.");
+  }
+
+  // finding invited user id by email
+  const invitedUserInfo = await prisma.user.findUnique({
     where: {
-      id: payload.invitationId,
-      email: receverUser?.email,
-    },
-    data: {
-      status: payload.status,
+      email: invitationData.email,
     },
   });
-  return updateInvitation;
+
+  if (!invitedUserInfo) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Invited user not found.");
+  }
+
+  // Use transaction if status is ACCEPTED
+  if (payload.status === InviteStatus.ACCEPTED) {
+    const result = await prisma.$transaction(async (tx) => {
+      const updateInvitation = await tx.invite.update({
+        where: { id: payload.invitationId },
+        data: { status: payload.status },
+      });
+
+      const createdParticipant = await tx.participant.create({
+        data: {
+          eventId: invitationData.eventId,
+          userId: invitedUserInfo?.id,
+          status: ParticipantStatus.JOINED,
+        },
+      });
+
+      return {
+        updateInvitation,
+        createdParticipant,
+      };
+    });
+
+    return result;
+  }
+
+  // Otherwise, just update status
+  const updateInvitation = await prisma.invite.update({
+    where: { id: payload.invitationId },
+    data: { status: payload.status },
+  });
+
+  return { updateInvitation };
 };
 
 const getallInvitations = async () => {
