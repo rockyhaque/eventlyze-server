@@ -5,6 +5,7 @@ import { StatusCodes } from "http-status-codes";
 import AppError from "../../errors/AppError";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 import { eventFilterableFields, eventSearchAbleFields } from "./event.constant";
+import { TAuthUser } from "../../interfaces/common";
 const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
@@ -118,7 +119,7 @@ const getAllEvents = async (params: any, options: any) => {
             select: {
               name: true,
               email: true,
-              photo: true
+              photo: true,
             },
           },
         },
@@ -127,9 +128,9 @@ const getAllEvents = async (params: any, options: any) => {
         select: {
           name: true,
           email: true,
-          photo: true
+          photo: true,
         },
-      }
+      },
     },
     skip,
     take: limit,
@@ -158,7 +159,7 @@ const getEventById = async (id: string) => {
             select: {
               name: true,
               email: true,
-              photo: true
+              photo: true,
             },
           },
         },
@@ -167,12 +168,62 @@ const getEventById = async (id: string) => {
         select: {
           name: true,
           email: true,
-          photo: true
+          photo: true,
         },
-      }
+      },
     },
   });
   return event;
+};
+
+const myCreatedEvents = async (user: TAuthUser) => {
+  const email = user?.email;
+  const userData = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!userData) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
+
+  const events = await prisma.event.findMany();
+  if (!events) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Event not found");
+  }
+
+  const myEvents = await prisma.event.findMany({
+    where: {
+      ownerId: userData.id,
+    },
+    include: {
+      participant: true,
+      review: {
+        include: {
+          user: {
+            select: {
+              name: true,
+              email: true,
+              photo: true,
+            },
+          },
+        },
+      },
+      owner: {
+        select: {
+          name: true,
+          email: true,
+          photo: true,
+        },
+      },
+    },
+  });
+
+  if (myEvents.length === 0) {
+    throw new AppError(StatusCodes.NOT_FOUND, "No events created by this user");
+  }
+  
+
+  return myEvents;
 };
 
 const getEventCategoryCount = async () => {
@@ -247,6 +298,7 @@ export const eventService = {
   createEvent,
   getAllEvents,
   getEventById,
+  myCreatedEvents,
   getEventCategoryCount,
   updateSingleEvent,
   deleteSingleEvent,

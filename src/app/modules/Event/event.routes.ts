@@ -9,6 +9,11 @@ const router = express.Router();
 
 router.get("/event-category-stats", eventController.getEventCategoryCount);
 router.get("/all-events", eventController.getEvents);
+router.get(
+  "/my-created-events",
+  auth(UserRole.USER),
+  eventController.myCreatedEvents
+);
 router.get("/:id", eventController.getEventById);
 
 router.post(
