@@ -210,49 +210,23 @@ const getSingleUserFromDB = async (id: string) => {
     throw new AppError(StatusCodes.NOT_FOUND, "User not found");
   }
 
-  return userData
+  return userData;
 };
 
 const myProfile = async (user: TAuthUser) => {
-  const userInfo = await prisma.user.findUnique({
+  const profile = await prisma.user.findUnique({
     where: {
       email: user?.email,
       status: UserStatus.ACTIVE,
     },
-    select: {
-      id: true,
-      email: true,
-      role: true,
-      needPasswordChange: true,
-      status: true,
-    },
+    select: safeUserSelect,
   });
 
-  let profileInfo;
-  if (userInfo?.role === UserRole.SUPER_ADMIN) {
-    profileInfo = await prisma.user.findUnique({
-      where: {
-        email: userInfo.email,
-      },
-      select: safeUserSelect,
-    });
-  } else if (userInfo?.role === UserRole.ADMIN) {
-    profileInfo = await prisma.user.findUnique({
-      where: {
-        email: userInfo.email,
-      },
-      select: safeUserSelect,
-    });
-  } else if (userInfo?.role === UserRole.USER) {
-    profileInfo = await prisma.user.findUnique({
-      where: {
-        email: userInfo.email,
-      },
-      select: safeUserSelect,
-    });
+  if (!profile) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Active user not found");
   }
 
-  return { ...userInfo, ...profileInfo };
+  return profile;
 };
 
 const changeProfileStatus = async (id: string, status: UserRole) => {
