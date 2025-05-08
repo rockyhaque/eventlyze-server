@@ -123,6 +123,13 @@ const getAllEvents = async (params: any, options: any) => {
           },
         },
       },
+      owner: {
+        select: {
+          name: true,
+          email: true,
+          photo: true
+        },
+      }
     },
     skip,
     take: limit,
