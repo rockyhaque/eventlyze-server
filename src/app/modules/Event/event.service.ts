@@ -195,11 +195,33 @@ const myCreatedEvents = async (user: TAuthUser) => {
     where: {
       ownerId: userData.id,
     },
+    include: {
+      participant: true,
+      review: {
+        include: {
+          user: {
+            select: {
+              name: true,
+              email: true,
+              photo: true,
+            },
+          },
+        },
+      },
+      owner: {
+        select: {
+          name: true,
+          email: true,
+          photo: true,
+        },
+      },
+    },
   });
 
   if (myEvents.length === 0) {
     throw new AppError(StatusCodes.NOT_FOUND, "No events created by this user");
   }
+  
 
   return myEvents;
 };
