@@ -163,6 +163,13 @@ const getEventById = async (id: string) => {
           },
         },
       },
+      owner: {
+        select: {
+          name: true,
+          email: true,
+          photo: true
+        },
+      }
     },
   });
   return event;
