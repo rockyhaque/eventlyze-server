@@ -8,7 +8,7 @@ const router = express.Router();
 // get All Review For Admin
 router.get("/", auth(UserRole.ADMIN), ReviewController.getAllReviewForAdmin);
 
-router.get("/", auth(UserRole.USER), ReviewController.getReviewsByUserId);
+router.get("/participant", auth(UserRole.USER), ReviewController.getReviewsByUserId);
 
 router.post("/", auth(UserRole.USER), ReviewController.createReview);
 

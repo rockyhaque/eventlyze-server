@@ -112,7 +112,17 @@ const getAllEvents = async (params: any, options: any) => {
     where: whereConditions,
     include: {
       participant: true,
-      review: true,
+      review: {
+        include: {
+          user: {
+            select: {
+              name: true,
+              email: true,
+              photo: true
+            },
+          },
+        },
+      },
     },
     skip,
     take: limit,
@@ -135,7 +145,17 @@ const getEventById = async (id: string) => {
     where: { id },
     include: {
       participant: true,
-      review: true,
+      review: {
+        include: {
+          user: {
+            select: {
+              name: true,
+              email: true,
+              photo: true
+            },
+          },
+        },
+      },
     },
   });
   return event;
