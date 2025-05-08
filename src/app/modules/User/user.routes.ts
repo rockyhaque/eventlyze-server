@@ -16,7 +16,7 @@ router.get(
 router.get(
   "/:id",
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.USER),
-  UserController.getAllUserFromDB
+  UserController.getSingleUserFromDB
 );
 
 router.get(
@@ -25,7 +25,7 @@ router.get(
   UserController.myProfile
 );
 
-router.get("/stats", auth(UserRole.USER), UserController.getUserStats)
+router.get("/stats", auth(UserRole.USER), UserController.getUserStats);
 
 router.post(
   "/create-user",
