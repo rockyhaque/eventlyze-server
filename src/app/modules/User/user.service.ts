@@ -209,6 +209,8 @@ const getSingleUserFromDB = async (id: string) => {
   if (!userData) {
     throw new AppError(StatusCodes.NOT_FOUND, "User not found");
   }
+
+  return userData
 };
 
 const myProfile = async (user: TAuthUser) => {
