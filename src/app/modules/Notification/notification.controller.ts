@@ -18,7 +18,7 @@ const allNotification = catchAsync(async (req: CustomRequest, res: Response): Pr
         statusCode: StatusCodes.OK,
         success: true,
         // message: result.message,
-        message: "Get all admin Notification  succesfully",
+        message: "Get all Notification  succesfully",
         data: result,
     });
 });
