@@ -78,8 +78,6 @@ const createAdmin = async (req: Request): Promise<TSafeUser> => {
 };
 
 const getUserStats = async (user: any) => {
-
-
   const userInfo = await prisma.user.findUnique({
     where: {
       email: user.email,
@@ -198,6 +196,19 @@ const getAllUserFromDB = async (params: any, options: IPaginationOptions) => {
     },
     data: result,
   };
+};
+
+const getSingleUserFromDB = async (id: string) => {
+  const userData = prisma.user.findUnique({
+    where: {
+      id,
+    },
+    select: safeUserSelect,
+  });
+
+  if (!userData) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
 };
 
 const myProfile = async (user: TAuthUser) => {
@@ -325,6 +336,7 @@ export const UserService = {
   createAdmin,
   getUserStats,
   getAllUserFromDB,
+  getSingleUserFromDB,
   myProfile,
   changeProfileStatus,
   updateRole,
