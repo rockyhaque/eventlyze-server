@@ -44,6 +44,18 @@ const getEventById = catchAsync(async (req: CustomRequest, res) => {
   });
 });
 
+const myCreatedEvents = catchAsync(async (req: CustomRequest, res) => {
+  const result = await eventService.myCreatedEvents(req.user);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "My created event retrieved successfully!",
+    data: result,
+  });
+});
+
+
+
 const getEventCategoryCount = catchAsync(
   async (req: Request, res: Response) => {
     const result = await eventService.getEventCategoryCount();
@@ -95,6 +107,7 @@ export const eventController = {
   createEvent,
   getEvents,
   getEventById,
+  myCreatedEvents,
   getEventCategoryCount,
   updateSingleEvent,
   deleteSingleEvent,
