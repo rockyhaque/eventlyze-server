@@ -84,6 +84,19 @@ const bannedParticipation = catchAsync(async (req: Request & { user?: TAuthUser 
   });
 });
 
+const participantStatusUpdate = catchAsync(async (req: Request & { user?: TAuthUser }, res: Response) => {
+  const { id } = req.params;
+  const result = await participantService.participantStatusUpdate(id, req);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Participant status updated successfully!",
+    data: result,
+  });
+});
+
+
+
 
 
 export const participationController = {
@@ -92,5 +105,6 @@ export const participationController = {
   getJoinedAllEventsByAdmin,
   createParticipantion,
   cancelParticipation,
-  bannedParticipation
+  bannedParticipation,
+  participantStatusUpdate
 };

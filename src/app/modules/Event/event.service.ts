@@ -173,7 +173,22 @@ const getEventById = async (id: string) => {
       },
     },
   });
-  return event;
+
+  if (!event) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Event not found");
+  }
+
+  const relatedEvents = await prisma.event.findMany({
+    where: {
+      category: event.category,
+    },
+  });
+
+  if (!relatedEvents) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Related Category not found");
+  }
+
+  return { event, relatedEvents };
 };
 
 const myCreatedEvents = async (user: TAuthUser) => {
@@ -310,6 +325,7 @@ const bannedEvent = async (id: string) => {
   return bannedEvent;
 };
 
+
 export const eventService = {
   createEvent,
   getAllEvents,
@@ -318,5 +334,5 @@ export const eventService = {
   getEventCategoryCount,
   updateSingleEvent,
   deleteSingleEvent,
-  bannedEvent,
+  bannedEvent
 };
