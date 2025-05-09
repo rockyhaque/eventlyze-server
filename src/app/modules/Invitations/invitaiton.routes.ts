@@ -7,7 +7,7 @@ const router = express.Router();
 
 
 router.get('/all-invitations',auth(UserRole.ADMIN,UserRole.SUPER_ADMIN),InvitationsController.getallInvitations)
-router.get('/all-host-invitations',auth(UserRole.USER), InvitationsController.gethostallInvtiations)
+router.get('/all-host-invitations',auth(UserRole.USER), InvitationsController.getHostAllInvitations)
 router.get('/all-participant-invitations',auth(UserRole.USER), InvitationsController.getParticipantAllInvtiations)
 
 router.post(

@@ -151,24 +151,48 @@ const getallInvitations = async () => {
 };
 
 // For Host
-const gethostallInvtiations = async (payload: TAuthUser) => {
-  const isExistuser = await prisma.user.findUnique({
+const getHostAllInvitations = async (payload: TAuthUser) => {
+  const isExistUser = await prisma.user.findUnique({
     where: {
       email: payload?.email,
     },
   });
 
-  if (!isExistuser) {
+  if (!isExistUser) {
     throw new AppError(StatusCodes.NOT_FOUND, "User not found.");
   }
 
-  const allinvitations = await prisma.invite.findMany({
+  // Get all invitations where user is host
+  const allInvitations = await prisma.invite.findMany({
     where: {
-      hostId: isExistuser?.id,
+      hostId: isExistUser.id,
     },
   });
-  return allinvitations;
+
+  // Extract eventIds from invites
+  const eventIds = allInvitations.map(invite => invite.eventId);
+
+  // Fetch all matching events in a single query
+  const events = await prisma.event.findMany({
+    where: {
+      id: {
+        in: eventIds,
+      },
+    },
+  });
+
+  // Map each invite to its corresponding event
+  const invitationsWithEvent = allInvitations.map(invite => {
+    const event = events.find(e => e.id === invite.eventId);
+    return {
+      ...invite,
+      event,
+    };
+  });
+
+  return invitationsWithEvent;
 };
+
 
 // For Participant
 const getParticipantAllInvtiations = async (user: TAuthUser) => {
@@ -182,20 +206,42 @@ const getParticipantAllInvtiations = async (user: TAuthUser) => {
     throw new AppError(StatusCodes.NOT_FOUND, "User not found.");
   }
 
-  const allinvitations = await prisma.invite.findMany({
+  // Get all invitations for the user
+  const allInvitations = await prisma.invite.findMany({
     where: {
-      email: userData?.email,
+      email: userData.email,
     },
   });
-  return allinvitations;
-};
 
+  // Get all event IDs from the invitations
+  const eventIds = allInvitations.map(invite => invite.eventId);
+
+  // Fetch all events related to the invitations in one query
+  const events = await prisma.event.findMany({
+    where: {
+      id: {
+        in: eventIds,
+      },
+    },
+  });
+
+  // Map each invite with its corresponding event
+  const invitationsWithEvent = allInvitations.map(invite => {
+    const event = events.find(e => e.id === invite.eventId);
+    return {
+      ...invite,
+      event,
+    };
+  });
+
+  return invitationsWithEvent;
+};
 
 
 export const InvitationsService = {
   createInvitations,
   updateStatus,
   getallInvitations,
-  gethostallInvtiations,
-  getParticipantAllInvtiations
+  getHostAllInvitations,
+  getParticipantAllInvtiations,
 };
