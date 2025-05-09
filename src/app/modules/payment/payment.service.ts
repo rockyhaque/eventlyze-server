@@ -39,14 +39,17 @@ const createpaymentBd = async (payload: Tpaymentpayload, user: TAuthUser) => {
     throw new AppError(StatusCodes.NOT_FOUND, "Event not found");
   }
 
+
+
+
   const id = uuid4();
   const data = {
     total_amount: eventData?.price,
     currency: "BDT",
     tran_id: id,
-    success_url: `${config.BACKEND_URL}/payments/success/${id}`,
-    fail_url: `${config.BACKEND_URL}/payments/faild/${id}`,
-    cancel_url: `${config.BACKEND_URL}/payments/cancle/${id}`,
+    success_url: `${config.CLIENT_URL}/payments/success/${id}`,
+    fail_url: `${config.CLIENT_URL}/payments/failed/${id}`,
+    cancel_url: `${config.CLIENT_URL}/payments/cancel/${id}`,
     ipn_url: "http://localhost:3030/ipn",
     shipping_method: "Courier",
     product_name: payload.eventId,
@@ -70,6 +73,7 @@ const createpaymentBd = async (payload: Tpaymentpayload, user: TAuthUser) => {
     ship_postcode: 1000,
     ship_country: "Bangladesh",
   };
+  console.log(data);
 
   const sslcz = new SSLCommerzPayment(
     store_id as string,
@@ -93,6 +97,86 @@ const createpaymentBd = async (payload: Tpaymentpayload, user: TAuthUser) => {
 
   return newpayment;
 };
+
+
+
+
+
+const validatePayment = async (payload: any, user: TAuthUser) => {
+  // console.log("Payload:", payload, "User:", user);
+  // ✅ You can optionally keep this if you want to validate payment status before proceeding
+  // if (!payload || payload.status !== 'VALID') {
+  //   return { message: "Invalid payment!" };
+  // }
+  const paymentId = payload.tran_id;
+  const excistingPayment = await prisma.payment.findUnique({
+    where: {
+      paymentId: paymentId,
+    },
+  });
+
+  if (!excistingPayment) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Payment not found");
+  }
+  const userData = await prisma.user.findUnique({
+    where: {
+      email: user?.email,
+    },
+  });
+
+  if (!userData) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
+  // // ✅ simulate validation for demo, replace this with actual logic if needed
+  const response = payload;
+
+
+  const updatedPayment = await prisma.payment.update({
+    where: {
+      paymentId: response.tran_id, // ✅ changed: transactionId → paymentId for consistency
+    },
+    data: {
+      status: PaymentStatus.COMPLETED,
+    },
+  });
+
+  console.log("Updated Payment:", updatedPayment);
+
+
+  // await prisma.$transaction(async (tx) => {
+  //   const updatedPayment = await tx.payment.update({
+  //     where: {
+  //       paymentId: response.tran_id, // ✅ changed: transactionId → paymentId for consistency
+  //     },
+  //     data: {
+  //       status: PaymentStatus.COMPLETED,
+  //       // paymentGatewayData: response,
+  //     },
+  //   });
+
+  //   await tx.event.update({
+  //     where: {
+  //       id: updatedPayment.eventId, // ✅ changed: appointment → event
+  //     },
+  //     data: {
+  //       paymentStatus: PaymentStatus.COMPLETED,
+  //     },
+  //   });
+  // });
+
+  // return {
+  //   message: "Payment success!",
+  // };
+  return updatedPayment;
+};
+
+
+
+
+
+
+
+
 
 const succfulpayment = async (tranId: string) => {
   const result = await prisma.payment.update({
@@ -155,4 +239,8 @@ export const PaymentService = {
   failpayment,
   canclepayment,
   getSinglePayment,
+  validatePayment
 };
+
+
+
