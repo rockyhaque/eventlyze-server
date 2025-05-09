@@ -61,7 +61,23 @@ const gethostallInvtiations = catchAsync(
     sendResponse(res, {
       statusCode: StatusCodes.OK,
       success: true,
-      message: "Get host all  invitations get successuflly!",
+      message: "Get all invitations get successuflly!",
+      data: result,
+    });
+  }
+);
+
+const getParticipantAllInvtiations = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res) => {
+    const participantUser = req.user;
+
+    const result = await InvitationsService.getParticipantAllInvtiations(
+      participantUser as TAuthUser
+    );
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "Get all participant invitations retrieved successuflly!",
       data: result,
     });
   }
@@ -72,4 +88,5 @@ export const InvitationsController = {
   updatStatusInvitations,
   getallInvitations,
   gethostallInvtiations,
+  getParticipantAllInvtiations
 };
