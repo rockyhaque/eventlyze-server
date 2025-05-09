@@ -119,4 +119,4 @@ A robust and scalable backend API for **Eventlyze - Event Planner & Participatio
 - **API Documentation**: Explore endpoints and schemas at `http://localhost:5000/api-docs` in development mode.
 
 📬 **Contact**  
-For issues or inquiries, reach out to [rockyhaque99@gmail.com](mailto:rockyhaque99@gmail.com).
+For issues or inquiries, reach out to [rockyhaque99@gmail.com](mailto:rockyhaque99@gmail.com). Thank you.
