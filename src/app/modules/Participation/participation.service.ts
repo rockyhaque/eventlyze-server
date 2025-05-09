@@ -169,7 +169,13 @@ const createParticipation = async (payload: any, user: any) => {
       },
       include: {
         event: true,
-        user: true,
+        user: {
+          select: {
+            name: true,
+            email: true, 
+            photo: true
+          }
+        },
       },
     });
 
