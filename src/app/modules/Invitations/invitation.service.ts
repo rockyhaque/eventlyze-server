@@ -144,11 +144,13 @@ const updateStatus = async (payload: any, receiverUser: TAuthUser) => {
   return { updateInvitation };
 };
 
+// For Admin
 const getallInvitations = async () => {
   const allinvitations = await prisma.invite.findMany();
   return allinvitations;
 };
 
+// For Host
 const gethostallInvtiations = async (payload: TAuthUser) => {
   const isExistuser = await prisma.user.findUnique({
     where: {
@@ -168,9 +170,32 @@ const gethostallInvtiations = async (payload: TAuthUser) => {
   return allinvitations;
 };
 
+// For Participant
+const getParticipantAllInvtiations = async (user: TAuthUser) => {
+  const userData = await prisma.user.findUnique({
+    where: {
+      email: user?.email,
+    },
+  });
+
+  if (!userData) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found.");
+  }
+
+  const allinvitations = await prisma.invite.findMany({
+    where: {
+      email: userData?.email,
+    },
+  });
+  return allinvitations;
+};
+
+
+
 export const InvitationsService = {
   createInvitations,
   updateStatus,
   getallInvitations,
   gethostallInvtiations,
+  getParticipantAllInvtiations
 };
