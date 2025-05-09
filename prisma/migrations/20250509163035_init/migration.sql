@@ -150,9 +150,6 @@ CREATE TABLE "Review" (
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
--- CreateIndex
-CREATE UNIQUE INDEX "Payment_eventId_key" ON "Payment"("eventId");
-
 -- AddForeignKey
 ALTER TABLE "events" ADD CONSTRAINT "events_inviteId_fkey" FOREIGN KEY ("inviteId") REFERENCES "Invite"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 

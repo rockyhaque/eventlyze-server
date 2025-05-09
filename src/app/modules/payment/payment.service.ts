@@ -2,7 +2,7 @@ import uuid4 from "uuid4";
 import SSLCommerzPayment from "sslcommerz-lts";
 import config from "../../../config";
 import prisma from "../../../shared/prisma";
-import { Event, PaymentStatus } from "@prisma/client";
+import { Event, ParticipantStatus, PaymentStatus } from "@prisma/client";
 import { TAuthUser } from "../../interfaces/common";
 import AppError from "../../errors/AppError";
 import { StatusCodes } from "http-status-codes";
@@ -39,9 +39,6 @@ const createpaymentBd = async (payload: Tpaymentpayload, user: TAuthUser) => {
     throw new AppError(StatusCodes.NOT_FOUND, "Event not found");
   }
 
-
-
-
   const id = uuid4();
   const data = {
     total_amount: eventData?.price,
@@ -73,7 +70,6 @@ const createpaymentBd = async (payload: Tpaymentpayload, user: TAuthUser) => {
     ship_postcode: 1000,
     ship_country: "Bangladesh",
   };
-  console.log(data);
 
   const sslcz = new SSLCommerzPayment(
     store_id as string,
@@ -98,16 +94,7 @@ const createpaymentBd = async (payload: Tpaymentpayload, user: TAuthUser) => {
   return newpayment;
 };
 
-
-
-
-
 const validatePayment = async (payload: any, user: TAuthUser) => {
-  // console.log("Payload:", payload, "User:", user);
-  // ✅ You can optionally keep this if you want to validate payment status before proceeding
-  // if (!payload || payload.status !== 'VALID') {
-  //   return { message: "Invalid payment!" };
-  // }
   const paymentId = payload.tran_id;
   const excistingPayment = await prisma.payment.findUnique({
     where: {
@@ -127,100 +114,31 @@ const validatePayment = async (payload: any, user: TAuthUser) => {
   if (!userData) {
     throw new AppError(StatusCodes.NOT_FOUND, "User not found");
   }
-  // // ✅ simulate validation for demo, replace this with actual logic if needed
+
   const response = payload;
 
+  const result = await prisma.$transaction(async (tx) => {
+    const updatedPayment = await tx.payment.update({
+      where: {
+        paymentId: response.tran_id, // transactionId → paymentId for consistency
+      },
+      data: {
+        status: PaymentStatus.COMPLETED,
+        // paymentGatewayData: response,
+      },
+    });
 
-  const updatedPayment = await prisma.payment.update({
-    where: {
-      paymentId: response.tran_id, // ✅ changed: transactionId → paymentId for consistency
-    },
-    data: {
-      status: PaymentStatus.COMPLETED,
-    },
+    await prisma.participant.create({
+      data: {
+        eventId: updatedPayment.eventId,
+        userId: userData.id,
+        status: ParticipantStatus.REQUESTED,
+      },
+    });
+    return updatedPayment;
   });
 
-  console.log("Updated Payment:", updatedPayment);
-
-
-  // await prisma.$transaction(async (tx) => {
-  //   const updatedPayment = await tx.payment.update({
-  //     where: {
-  //       paymentId: response.tran_id, // ✅ changed: transactionId → paymentId for consistency
-  //     },
-  //     data: {
-  //       status: PaymentStatus.COMPLETED,
-  //       // paymentGatewayData: response,
-  //     },
-  //   });
-
-  //   await tx.event.update({
-  //     where: {
-  //       id: updatedPayment.eventId, // ✅ changed: appointment → event
-  //     },
-  //     data: {
-  //       paymentStatus: PaymentStatus.COMPLETED,
-  //     },
-  //   });
-  // });
-
-  // return {
-  //   message: "Payment success!",
-  // };
-  return updatedPayment;
-};
-
-
-
-
-
-
-
-
-
-const succfulpayment = async (tranId: string) => {
-  const result = await prisma.payment.update({
-    where: {
-      paymentId: tranId,
-    },
-    data: {
-      status: PaymentStatus.SUCCESS,
-    },
-  });
-
-  if (result.status === PaymentStatus.SUCCESS) {
-    return "http://localhost:3000/";
-  }
-};
-
-const failpayment = async (tranId: string) => {
-  const result = await prisma.payment.update({
-    where: {
-      paymentId: tranId,
-    },
-    data: {
-      status: PaymentStatus.FAILED,
-    },
-  });
-
-  if (result.status === PaymentStatus.FAILED) {
-    return "http://localhost:3000/";
-  }
-};
-
-const canclepayment = async (tranId: string) => {
-  const result = await prisma.payment.update({
-    where: {
-      paymentId: tranId,
-    },
-    data: {
-      status: PaymentStatus.CANCELLED,
-    },
-  });
-
-  if (result.status === PaymentStatus.CANCELLED) {
-    return "http://localhost:3000/";
-  }
+  return result;
 };
 
 const getSinglePayment = async (userId: string, eventId: string) => {
@@ -235,12 +153,6 @@ const getSinglePayment = async (userId: string, eventId: string) => {
 
 export const PaymentService = {
   createpaymentBd,
-  succfulpayment,
-  failpayment,
-  canclepayment,
   getSinglePayment,
-  validatePayment
+  validatePayment,
 };
-
-
-

@@ -63,7 +63,7 @@ model Event {
   reviewId String?
   ownerId  String
   inviteId String?
-  payment  Payment?
+  payments    Payment[]
 
   participant Participant[]
 
@@ -114,7 +114,7 @@ model Invite {
 // payment model
 model Payment {
   paymentId  String        @id
-  eventId    String        @unique
+  eventId    String        
   userId     String?
   paymentUrl String
   transactionId String?
