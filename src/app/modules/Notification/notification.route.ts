@@ -16,6 +16,12 @@ router.get(
     NotificationController.allNotification
 );
 
+// Update Notification Router
+router.patch(
+    "/update-notification",
+    auth(UserRole.USER, UserRole.ADMIN, UserRole.SUPER_ADMIN),
+    NotificationController.updateAllNotificatoin
+);
 
 // Update Single Notification Router
 router.patch(
@@ -25,12 +31,7 @@ router.patch(
 );
 
 
-// Update Notification Router
-router.patch(
-    "/update-notification",
-    auth(UserRole.USER, UserRole.ADMIN, UserRole.SUPER_ADMIN),
-    NotificationController.updateAllNotificatoin
-);
+
 
 
 export const NotificationRoutes = router;

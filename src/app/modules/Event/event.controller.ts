@@ -25,6 +25,16 @@ const getEvents = catchAsync(async (req: CustomRequest, res) => {
   const filters = pick(req.query, eventFilterableFields);
   const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
   const result = await eventService.getAllEvents(filters, options);
+
+  if (result.data.length === 0) {
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "No events found!",
+      data: null,
+    });
+  }
+
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
@@ -43,6 +53,18 @@ const getEventById = catchAsync(async (req: CustomRequest, res) => {
     data: result,
   });
 });
+
+const myCreatedEvents = catchAsync(async (req: CustomRequest, res) => {
+  const result = await eventService.myCreatedEvents(req.user);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "My created event retrieved successfully!",
+    data: result,
+  });
+});
+
+
 
 const getEventCategoryCount = catchAsync(
   async (req: Request, res: Response) => {
@@ -95,6 +117,7 @@ export const eventController = {
   createEvent,
   getEvents,
   getEventById,
+  myCreatedEvents,
   getEventCategoryCount,
   updateSingleEvent,
   deleteSingleEvent,

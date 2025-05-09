@@ -101,6 +101,14 @@ const createParticipation = async (payload: any, user: any) => {
     throw new AppError(StatusCodes.NOT_FOUND, "Event Not Found");
   }
 
+  //  Prevent creator from joining their own event
+  if (eventData.ownerId === userData.id) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      "You cannot join your own event."
+    );
+  }
+
   if (eventData.isPaid) {
     if (!eventData?.payment) {
       throw new AppError(StatusCodes.FORBIDDEN, "Event is not paid yet");
@@ -161,7 +169,13 @@ const createParticipation = async (payload: any, user: any) => {
       },
       include: {
         event: true,
-        user: true,
+        user: {
+          select: {
+            name: true,
+            email: true,
+            photo: true,
+          },
+        },
       },
     });
 
@@ -255,6 +269,72 @@ const bannedParticipation = async (id: string, user: TAuthUser) => {
   return updatedParticipant;
 };
 
+const participantStatusUpdate = async (id: string, req: any) => {
+  const user = req.user;
+  const payload = req.body;
+  // console.log({id, user, payload})
+
+  // Get the user from DB
+  const userData = await prisma.user.findUnique({
+    where: {
+      email: user?.email,
+    },
+  });
+
+  if (!userData) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
+
+  // Get the participant record
+  const participant = await prisma.participant.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      event: true,
+    },
+  });
+
+  if (!participant) {
+    throw new AppError(StatusCodes.NOT_FOUND, "You haven't participated yet");
+  }
+
+  if (participant.status === ParticipantStatus.BANNED) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Participant is already banned"
+    );
+  }
+
+  // Check if the logged-in user is the owner of the event
+  if (participant.event.ownerId !== userData.id) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      "Only the event creator can ban participants"
+    );
+  }
+
+  // Update the participant's status to BANNED
+  const updatedParticipant = await prisma.participant.update({
+    where: {
+      id,
+      status: ParticipantStatus.REQUESTED,
+    },
+    data: {
+      status: payload.status,
+    },
+  });
+
+  if (!updatedParticipant) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      "Only the event creator can ban participants"
+    );
+  }
+
+  return updatedParticipant;
+};
+
 export const participantService = {
   getJoinedEventsByUser,
   getJoinedAllEventsByAdmin,
@@ -262,4 +342,5 @@ export const participantService = {
   cancelParticipation,
   getJoinedEventCategoryCount,
   bannedParticipation,
+  participantStatusUpdate,
 };
