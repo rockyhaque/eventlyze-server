@@ -71,7 +71,7 @@ CREATE TABLE "events" (
     "eventEndTime" TIMESTAMP(3) NOT NULL,
     "seat" INTEGER NOT NULL,
     "eventBanner" TEXT,
-    "status" "EventStatus" NOT NULL DEFAULT 'UPCOMING',
+    "status" "EventStatus" NOT NULL,
     "eventType" "EventType" NOT NULL DEFAULT 'OFFLINE',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
