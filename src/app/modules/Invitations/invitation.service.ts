@@ -88,12 +88,12 @@ const updateStatus = async (payload: any, receiverUser: TAuthUser) => {
     throw new AppError(StatusCodes.NOT_FOUND, "Invitation not found.");
   }
 
-  if (invitationData.hostId !== hostUser.id) {
-    throw new AppError(
-      StatusCodes.FORBIDDEN,
-      "You are not allowed to update this invitation."
-    );
-  }
+  // if (invitationData.hostId !== hostUser.id) {
+  //   throw new AppError(
+  //     StatusCodes.FORBIDDEN,
+  //     "You are not allowed to update this invitation."
+  //   );
+  // }
 
   if (invitationData.status === InviteStatus.ACCEPTED) {
     throw new AppError(StatusCodes.FORBIDDEN, "Already invitation accepted.");
