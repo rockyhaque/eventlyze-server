@@ -1,4 +1,8 @@
-import { EventCategory, ParticipantStatus } from "@prisma/client";
+import {
+  EventCategory,
+  ParticipantStatus,
+  PaymentStatus,
+} from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import AppError from "../../errors/AppError";
 import { StatusCodes } from "http-status-codes";
@@ -93,7 +97,7 @@ const createParticipation = async (payload: any, user: any) => {
       id: eventId,
     },
     include: {
-      payment: true,
+      payments: true,
     },
   });
 
@@ -110,7 +114,7 @@ const createParticipation = async (payload: any, user: any) => {
   }
 
   if (eventData.isPaid) {
-    if (!eventData?.payment) {
+    if (!eventData?.payments) {
       throw new AppError(StatusCodes.FORBIDDEN, "Event is not paid yet");
     }
   }
@@ -311,6 +315,20 @@ const participantStatusUpdate = async (id: string, req: any) => {
     throw new AppError(
       StatusCodes.FORBIDDEN,
       "Only the event creator can ban participants"
+    );
+  }
+
+  const paymentData = await prisma.payment.findFirst({
+    where: {
+      userId: participant.userId,
+      status: PaymentStatus.COMPLETED,
+    },
+  });
+
+  if (!paymentData) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      "You didn't complete your payment"
     );
   }
 

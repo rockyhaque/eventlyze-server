@@ -259,13 +259,10 @@ const getEventCategoryCount = async () => {
     categoryCounts[event.category]++;
   });
 
-  console.log(categoryCounts);
-
   return categoryCounts;
 };
 
 const updateSingleEvent = async (id: string, data: Partial<Event>) => {
-  console.log(data);
   const event = await prisma.event.update({
     where: { id },
     data,

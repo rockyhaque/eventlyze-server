@@ -129,8 +129,6 @@ const updateAllNotificatoinIntoDB = async (user: JwtPayload) => {
         read: true,
       },
     });
-
-    console.log(updateNotificationByAdmin);
     
 
     return updateNotificationByAdmin;
