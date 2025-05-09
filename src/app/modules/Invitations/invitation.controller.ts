@@ -51,11 +51,11 @@ const getallInvitations = catchAsync(async (req: Request, res) => {
   });
 });
 
-const gethostallInvtiations = catchAsync(
+const getHostAllInvitations = catchAsync(
   async (req: Request & { user?: TAuthUser }, res) => {
     const receveruser = req.user;
 
-    const result = await InvitationsService.gethostallInvtiations(
+    const result = await InvitationsService.getHostAllInvitations(
       receveruser as TAuthUser
     );
     sendResponse(res, {
@@ -87,6 +87,6 @@ export const InvitationsController = {
   createInvitations,
   updatStatusInvitations,
   getallInvitations,
-  gethostallInvtiations,
+  getHostAllInvitations,
   getParticipantAllInvtiations
 };
