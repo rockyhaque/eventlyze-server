@@ -29,6 +29,12 @@ router.post(
   participationController.createParticipantion
 );
 
+router.patch(
+  "/update-status/:id",
+  auth(UserRole.USER),
+  participationController.participantStatusUpdate
+);
+
 router.delete(
   "/cancel-participation/:id",
   auth(UserRole.USER),
@@ -40,5 +46,8 @@ router.delete(
   auth(UserRole.USER),
   participationController.bannedParticipation
 );
+
+
+
 
 export const ParticipantRoutes = router;
