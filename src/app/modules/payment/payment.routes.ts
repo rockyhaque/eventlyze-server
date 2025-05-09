@@ -11,8 +11,5 @@ router.get(
     auth(UserRole.USER), PaymentController.validatePayment
 )
 
-router.post("/success/:id", PaymentController.successfullypaid);
-router.post("/faild/:id", PaymentController.paymentFails);
-router.post("/cancle/:id", PaymentController.paymentcancle);
 
 export const PaymentRoutes = router;

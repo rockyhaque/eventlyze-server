@@ -32,23 +32,7 @@ const validatePayment = catchAsync(async (req: CustomRequest, res: Response) => 
   });
 });
 
-const successfullypaid = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const result = await PaymentService.succfulpayment(id);
-  res.redirect(301, result as string);
-});
 
-const paymentFails = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const result = await PaymentService.failpayment(id);
-  res.redirect(301, result as string);
-});
-
-const paymentcancle = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const result = await PaymentService.canclepayment(id);
-  res.redirect(301, result as string);
-});
 
 const getpayment = catchAsync(async (req: Request, res: Response) => {
   const { userId, eventId } = req.params;
@@ -62,9 +46,6 @@ const getpayment = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const PaymentController = {
-  successfullypaid,
-  paymentFails,
-  paymentcancle,
   getpayment,
   createPayment,
   validatePayment,
