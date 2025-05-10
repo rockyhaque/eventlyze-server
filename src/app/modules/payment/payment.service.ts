@@ -2,7 +2,12 @@ import uuid4 from "uuid4";
 import SSLCommerzPayment from "sslcommerz-lts";
 import config from "../../../config";
 import prisma from "../../../shared/prisma";
-import { Event, ParticipantStatus, PaymentStatus } from "@prisma/client";
+import {
+  Event,
+  ParticipantStatus,
+  PaymentStatus,
+  UserRole,
+} from "@prisma/client";
 import { TAuthUser } from "../../interfaces/common";
 import AppError from "../../errors/AppError";
 import { StatusCodes } from "http-status-codes";
@@ -17,6 +22,43 @@ type Tpaymentpayload = {
 const store_id = config.SSLcommer_store_id;
 const store_passwd = config.SSLcommer_password;
 const is_live = false;
+
+const getAllPayments = async (user: TAuthUser) => {
+  const userData = await prisma.user.findUnique({
+    where: {
+      email: user?.email,
+    },
+  });
+
+  if (!userData) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
+
+  let payments;
+
+  if (
+    userData.role === UserRole.ADMIN ||
+    userData.role === UserRole.SUPER_ADMIN
+  ) {
+    // Admins see all payments
+    payments = await prisma.payment.findMany({});
+  } else if (userData.role === UserRole.USER) {
+    // Regular users see only their own payments
+    payments = await prisma.payment.findMany({
+      where: {
+        userId: userData.id,
+      },
+    });
+  } else {
+    throw new AppError(StatusCodes.FORBIDDEN, "Unauthorized access");
+  }
+
+  if (!payments || payments.length === 0) {
+    throw new AppError(StatusCodes.NOT_FOUND, "No payment found");
+  }
+
+  return payments;
+};
 
 const createPayment = async (payload: Tpaymentpayload, user: TAuthUser) => {
   const userData = await prisma.user.findUnique({
@@ -150,56 +192,57 @@ const getSinglePayment = async (userId: string, eventId: string) => {
   return result;
 };
 
-const paymentSuccess = async (tranId:string) => {
+const paymentSuccess = async (tranId: string) => {
   const result = await prisma.payment.update({
-      where: {
-        paymentId: tranId,
-      },
-      data: {
-        status: PaymentStatus.SUCCESS
-      },
-   })
+    where: {
+      paymentId: tranId,
+    },
+    data: {
+      status: PaymentStatus.SUCCESS,
+    },
+  });
 
-   if(result.status === PaymentStatus.SUCCESS){
-      return `${config.CLIENT_URL}/payments/success`
-   }
-}
+  if (result.status === PaymentStatus.SUCCESS) {
+    return `${config.CLIENT_URL}/payments/success`;
+  }
+};
 
-const paymentFailed = async (tranId:string) => {
+const paymentFailed = async (tranId: string) => {
   const result = await prisma.payment.update({
-      where: {
-        paymentId: tranId,
-      },
-      data: {
-        status: PaymentStatus.FAILED
-      },
-   })
+    where: {
+      paymentId: tranId,
+    },
+    data: {
+      status: PaymentStatus.FAILED,
+    },
+  });
 
-   if(result.status === PaymentStatus.FAILED){
-      return `${config.CLIENT_URL}/payments/failed`
-   }
-}
+  if (result.status === PaymentStatus.FAILED) {
+    return `${config.CLIENT_URL}/payments/failed`;
+  }
+};
 
-const paymentCancel = async (tranId:string) => {
+const paymentCancel = async (tranId: string) => {
   const result = await prisma.payment.update({
-      where: {
-        paymentId: tranId,
-      },
-      data: {
-        status: PaymentStatus.CANCELLED
-      },
-   })
+    where: {
+      paymentId: tranId,
+    },
+    data: {
+      status: PaymentStatus.CANCELLED,
+    },
+  });
 
-   if(result.status === PaymentStatus.CANCELLED){
-      return `${config.CLIENT_URL}/payments/failed`
-   }
-}
+  if (result.status === PaymentStatus.CANCELLED) {
+    return `${config.CLIENT_URL}/payments/failed`;
+  }
+};
 
 export const PaymentService = {
+  getAllPayments,
   createPayment,
   getSinglePayment,
   validatePayment,
   paymentSuccess,
   paymentFailed,
-  paymentCancel
+  paymentCancel,
 };
