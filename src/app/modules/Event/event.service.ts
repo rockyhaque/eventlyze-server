@@ -181,10 +181,11 @@ const getEventById = async (id: string) => {
   const relatedEvents = await prisma.event.findMany({
     where: {
       category: event.category,
+      NOT: {id}
     },
   });
 
-  if (!relatedEvents) {
+  if (!relatedEvents || relatedEvents.length === 0) {
     throw new AppError(StatusCodes.NOT_FOUND, "Related Category not found");
   }
 
