@@ -170,7 +170,7 @@ const getHostAllInvitations = async (payload: TAuthUser) => {
   });
 
   // Extract eventIds from invites
-  const eventIds = allInvitations.map(invite => invite.eventId);
+  const eventIds = allInvitations.map((invite) => invite.eventId);
 
   // Fetch all matching events in a single query
   const events = await prisma.event.findMany({
@@ -182,8 +182,8 @@ const getHostAllInvitations = async (payload: TAuthUser) => {
   });
 
   // Map each invite to its corresponding event
-  const invitationsWithEvent = allInvitations.map(invite => {
-    const event = events.find(e => e.id === invite.eventId);
+  const invitationsWithEvent = allInvitations.map((invite) => {
+    const event = events.find((e) => e.id === invite.eventId);
     return {
       ...invite,
       event,
@@ -192,7 +192,6 @@ const getHostAllInvitations = async (payload: TAuthUser) => {
 
   return invitationsWithEvent;
 };
-
 
 // For Participant
 const getParticipantAllInvtiations = async (user: TAuthUser) => {
@@ -214,7 +213,7 @@ const getParticipantAllInvtiations = async (user: TAuthUser) => {
   });
 
   // Get all event IDs from the invitations
-  const eventIds = allInvitations.map(invite => invite.eventId);
+  const eventIds = allInvitations.map((invite) => invite.eventId);
 
   // Fetch all events related to the invitations in one query
   const events = await prisma.event.findMany({
@@ -225,18 +224,37 @@ const getParticipantAllInvtiations = async (user: TAuthUser) => {
     },
   });
 
+  // collect unique host IDs from invites or events
+  const hostIds = [...new Set(allInvitations.map((invite) => invite.hostId))];
+
+  // fetch host details from User model
+  const hosts = await prisma.user.findMany({
+    where: {
+      id: {
+        in: hostIds,
+      },
+    },
+  });
+
   // Map each invite with its corresponding event
-  const invitationsWithEvent = allInvitations.map(invite => {
-    const event = events.find(e => e.id === invite.eventId);
+  const invitationsWithEvent = allInvitations.map((invite) => {
+    const event = events.find((e) => e.id === invite.eventId);
+    const host = hosts.find((h) => h.id === invite.hostId);
     return {
       ...invite,
       event,
+      host: host
+        ? {
+            name: host.name,
+            email: host.email,
+            photo: host.photo,
+          }
+        : null,
     };
   });
 
   return invitationsWithEvent;
 };
-
 
 export const InvitationsService = {
   createInvitations,
