@@ -9,6 +9,19 @@ interface CustomRequest extends Request {
   user?: any;
 }
 
+const getAllPayments = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const user = req.user;
+    const result = await PaymentService.getAllPayments(user as TAuthUser);
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "All Payments retrieved successfully",
+      data: result,
+    });
+  }
+);
+
 const createPayment = catchAsync(
   async (req: Request & { user?: TAuthUser }, res: Response) => {
     const result = await PaymentService.createPayment(
@@ -67,6 +80,7 @@ const paymentCancel = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const PaymentController = {
+  getAllPayments,
   getPayment,
   createPayment,
   validatePayment,
