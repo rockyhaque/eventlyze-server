@@ -11,11 +11,11 @@ interface CustomRequest extends Request {
 }
 
 const createPayment = catchAsync(async (req: Request & { user?: TAuthUser }, res: Response) => {
-  const result = await PaymentService.createpaymentBd(req.body, req.user as TAuthUser);
+  const result = await PaymentService.createPayment(req.body, req.user as TAuthUser);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
-    message: "succesfully get payment",
+    message: "successfully get payment",
     data: result,
   });
 });
@@ -32,21 +32,41 @@ const validatePayment = catchAsync(async (req: CustomRequest, res: Response) => 
   });
 });
 
-
-
-const getpayment = catchAsync(async (req: Request, res: Response) => {
+const getPayment = catchAsync(async (req: Request, res: Response) => {
   const { userId, eventId } = req.params;
   const result = await PaymentService.getSinglePayment(userId, eventId);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
-    message: "succesfully get payment",
+    message: "successfully get payment",
     data: result,
   });
 });
 
+const paymentSuccess = catchAsync(async (req:Request, res:Response) => {
+  const {id} = req.params;
+  const result = await PaymentService.paymentSuccess(id)  ;
+  res.redirect(301, result as string);
+});
+
+const paymentFailed = catchAsync(async (req:Request, res:Response) => {
+  const {id} = req.params;
+  const result = await PaymentService.paymentFailed(id)  ;
+  res.redirect(301, result as string);
+});
+
+
+const paymentCancel = catchAsync(async (req:Request, res:Response) => {
+  const {id} = req.params;
+  const result = await PaymentService.paymentCancel(id)  ;
+  res.redirect(301, result as string);
+});
+
 export const PaymentController = {
-  getpayment,
+  getPayment,
   createPayment,
   validatePayment,
+  paymentSuccess,
+  paymentFailed,
+  paymentCancel
 };

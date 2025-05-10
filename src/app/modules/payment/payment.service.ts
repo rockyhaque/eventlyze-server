@@ -18,7 +18,7 @@ const store_id = config.SSLcommer_store_id;
 const store_passwd = config.SSLcommer_password;
 const is_live = false;
 
-const createpaymentBd = async (payload: Tpaymentpayload, user: TAuthUser) => {
+const createPayment = async (payload: Tpaymentpayload, user: TAuthUser) => {
   const userData = await prisma.user.findUnique({
     where: {
       email: user?.email,
@@ -44,9 +44,9 @@ const createpaymentBd = async (payload: Tpaymentpayload, user: TAuthUser) => {
     total_amount: eventData?.price,
     currency: "BDT",
     tran_id: id,
-    success_url: `${config.CLIENT_URL}/payments/success/${id}`,
-    fail_url: `${config.CLIENT_URL}/payments/failed/${id}`,
-    cancel_url: `${config.CLIENT_URL}/payments/cancel/${id}`,
+    success_url: `${config.BACKEND_URL}/payments/success/${id}`,
+    fail_url: `${config.BACKEND_URL}/payments/faild/${id}`,
+    cancel_url: `${config.BACKEND_URL}/payments/cancle/${id}`,
     ipn_url: "http://localhost:3030/ipn",
     shipping_method: "Courier",
     product_name: payload.eventId,
@@ -124,7 +124,6 @@ const validatePayment = async (payload: any, user: TAuthUser) => {
       },
       data: {
         status: PaymentStatus.COMPLETED,
-        // paymentGatewayData: response,
       },
     });
 
@@ -151,8 +150,56 @@ const getSinglePayment = async (userId: string, eventId: string) => {
   return result;
 };
 
+const paymentSuccess = async (tranId:string) => {
+  const result = await prisma.payment.update({
+      where: {
+        paymentId: tranId,
+      },
+      data: {
+        status: PaymentStatus.SUCCESS
+      },
+   })
+
+   if(result.status === PaymentStatus.SUCCESS){
+      return `${config.CLIENT_URL}/payments/success`
+   }
+}
+
+const paymentFailed = async (tranId:string) => {
+  const result = await prisma.payment.update({
+      where: {
+        paymentId: tranId,
+      },
+      data: {
+        status: PaymentStatus.FAILED
+      },
+   })
+
+   if(result.status === PaymentStatus.FAILED){
+      return `${config.CLIENT_URL}/payments/failed`
+   }
+}
+
+const paymentCancel = async (tranId:string) => {
+  const result = await prisma.payment.update({
+      where: {
+        paymentId: tranId,
+      },
+      data: {
+        status: PaymentStatus.CANCELLED
+      },
+   })
+
+   if(result.status === PaymentStatus.CANCELLED){
+      return `${config.CLIENT_URL}/payments/failed`
+   }
+}
+
 export const PaymentService = {
-  createpaymentBd,
+  createPayment,
   getSinglePayment,
   validatePayment,
+  paymentSuccess,
+  paymentFailed,
+  paymentCancel
 };
