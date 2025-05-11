@@ -59,7 +59,7 @@ const myCreatedEvents = catchAsync(async (req: CustomRequest, res) => {
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
-    message: "My created event retrieved successfully!",
+    message: "Events retrieved successfully!",
     data: result,
   });
 });
