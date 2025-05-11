@@ -23,7 +23,7 @@ router.post(
   eventController.createEvent
 );
 router.put("/:id", auth(UserRole.USER), eventController.updateSingleEvent);
-router.delete("/:id", auth(UserRole.USER), eventController.deleteSingleEvent);
+router.delete("/:id", auth(UserRole.USER, UserRole.ADMIN, UserRole.SUPER_ADMIN), eventController.deleteSingleEvent);
 router.delete(
   "/banned-event/:id",
   auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
