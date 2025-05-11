@@ -100,7 +100,19 @@ const getAllParticipations = async (user: TAuthUser) => {
         userId: userData.id,
       },
       include: {
-        event: true,
+        event: {
+          select: {
+            title: true,
+            category: true
+          }
+        },
+        user: {
+          select: {
+            name: true,
+            email: true,
+            photo: true
+          }
+        }
       },
     });
   } else {
