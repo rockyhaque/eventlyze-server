@@ -2,12 +2,14 @@ import {
   EventCategory,
   ParticipantStatus,
   PaymentStatus,
+  UserRole,
 } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import AppError from "../../errors/AppError";
 import { StatusCodes } from "http-status-codes";
 import { TAuthUser } from "../../interfaces/common";
 
+// TODO: Maybe no need. Refector later
 const getJoinedEventsByUser = async (user: any) => {
   const userData = await prisma.user.findUnique({
     where: {
@@ -22,12 +24,14 @@ const getJoinedEventsByUser = async (user: any) => {
   const joinedEvents = await prisma.participant.findMany({
     where: {
       userId: userData.id,
-      status: ParticipantStatus.JOINED,
+      // status: ParticipantStatus.JOINED,
     },
     include: {
       event: true,
     },
   });
+
+  let join;
 
   if (joinedEvents.length === 0) {
     throw new AppError(StatusCodes.NOT_FOUND, "You haven't joined any event");
@@ -65,18 +69,49 @@ const getJoinedEventCategoryCount = async () => {
   return categoryCounts;
 };
 
-const getJoinedAllEventsByAdmin = async () => {
-  const joinedAllEvents = await prisma.participant.findMany({
-    include: {
-      event: true,
+// Role based get Participations
+const getAllParticipations = async (user: TAuthUser) => {
+  const userData = await prisma.user.findUnique({
+    where: {
+      email: user?.email,
     },
   });
 
-  if (joinedAllEvents.length === 0) {
+  if (!userData) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
+
+  let participants;
+
+  if (
+    userData.role === UserRole.ADMIN ||
+    userData.role === UserRole.SUPER_ADMIN
+  ) {
+    // Admins see all participants
+    participants = await prisma.participant.findMany({
+      include: {
+        event: true,
+      },
+    });
+  } else if (userData.role === UserRole.USER) {
+    // Regular users see only their own participations
+    participants = await prisma.participant.findMany({
+      where: {
+        userId: userData.id,
+      },
+      include: {
+        event: true,
+      },
+    });
+  } else {
+    throw new AppError(StatusCodes.FORBIDDEN, "Unauthorized access");
+  }
+
+  if (!participants || participants.length === 0) {
     throw new AppError(StatusCodes.NOT_FOUND, "No Paricipation Found");
   }
 
-  return joinedAllEvents;
+  return participants;
 };
 
 const createParticipation = async (payload: any, user: any) => {
@@ -355,10 +390,10 @@ const participantStatusUpdate = async (id: string, req: any) => {
 
 export const participantService = {
   getJoinedEventsByUser,
-  getJoinedAllEventsByAdmin,
+  getAllParticipations,
+  getJoinedEventCategoryCount,
   createParticipation,
   cancelParticipation,
-  getJoinedEventCategoryCount,
   bannedParticipation,
   participantStatusUpdate,
 };

@@ -6,6 +6,7 @@ import { Request, Response } from "express";
 import { participantService } from "./participation.service";
 import { TAuthUser } from "../../interfaces/common";
 
+// TODO: Maybe no need. Refector later
 const getJoinedEventsByUser = catchAsync(
   async (req: Request & { user?: TAuthUser }, res: Response) => {
     const user = req.user;
@@ -33,13 +34,16 @@ const getJoinedEventCategoryCount = catchAsync(
   }
 );
 
-const getJoinedAllEventsByAdmin = catchAsync(
-  async (req: Request, res: Response) => {
-    const result = await participantService.getJoinedAllEventsByAdmin();
+const getAllParticipations = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const user = req.user;
+    const result = await participantService.getAllParticipations(
+      user as TAuthUser
+    );
     sendResponse(res, {
       statusCode: StatusCodes.OK,
       success: true,
-      message: "All Joined events fetched successfully",
+      message: "All Participants fetched successfully",
       data: result,
     });
   }
@@ -72,39 +76,42 @@ const cancelParticipation = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const bannedParticipation = catchAsync(async (req: Request & { user?: TAuthUser }, res: Response) => {
-  const { id } = req.params;
-  const user = req.user;
-  const result = await participantService.bannedParticipation(id, user as TAuthUser);
-  sendResponse(res, {
-    statusCode: StatusCodes.OK,
-    success: true,
-    message: "Participant Banned Successfully!",
-    data: result,
-  });
-});
+const bannedParticipation = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const { id } = req.params;
+    const user = req.user;
+    const result = await participantService.bannedParticipation(
+      id,
+      user as TAuthUser
+    );
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "Participant Banned Successfully!",
+      data: result,
+    });
+  }
+);
 
-const participantStatusUpdate = catchAsync(async (req: Request & { user?: TAuthUser }, res: Response) => {
-  const { id } = req.params;
-  const result = await participantService.participantStatusUpdate(id, req);
-  sendResponse(res, {
-    statusCode: StatusCodes.OK,
-    success: true,
-    message: "Participant status updated successfully!",
-    data: result,
-  });
-});
-
-
-
-
+const participantStatusUpdate = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const { id } = req.params;
+    const result = await participantService.participantStatusUpdate(id, req);
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "Participant status updated successfully!",
+      data: result,
+    });
+  }
+);
 
 export const participationController = {
   getJoinedEventsByUser,
   getJoinedEventCategoryCount,
-  getJoinedAllEventsByAdmin,
+  getAllParticipations,
   createParticipantion,
   cancelParticipation,
   bannedParticipation,
-  participantStatusUpdate
+  participantStatusUpdate,
 };
