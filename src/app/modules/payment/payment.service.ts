@@ -44,7 +44,7 @@ const createpaymentBd = async (payload: Tpaymentpayload, user: TAuthUser) => {
     total_amount: eventData?.price,
     currency: "BDT",
     tran_id: id,
-    success_url: `${config.CLIENT_URL}/payments/success/${id}`,
+    success_url: `${config.CLIENT_URL}/payment-status?tran_id=${id}`,
     fail_url: `${config.CLIENT_URL}/payments/failed/${id}`,
     cancel_url: `${config.CLIENT_URL}/payments/cancel/${id}`,
     ipn_url: "http://localhost:3030/ipn",
