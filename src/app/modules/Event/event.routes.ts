@@ -11,7 +11,7 @@ router.get("/event-category-stats", eventController.getEventCategoryCount);
 router.get("/all-events", eventController.getEvents);
 router.get(
   "/my-created-events",
-  auth(UserRole.USER),
+  auth(UserRole.USER, UserRole.ADMIN, UserRole.SUPER_ADMIN),
   eventController.myCreatedEvents
 );
 router.get("/:id", eventController.getEventById);

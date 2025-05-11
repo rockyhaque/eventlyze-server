@@ -1,4 +1,10 @@
-import { Event, EventCategory, EventStatus, Prisma } from "@prisma/client";
+import {
+  Event,
+  EventCategory,
+  EventStatus,
+  Prisma,
+  UserRole,
+} from "@prisma/client";
 import { JwtPayload } from "jsonwebtoken";
 import { isBefore, isWithinInterval } from "date-fns";
 import { StatusCodes } from "http-status-codes";
@@ -181,7 +187,7 @@ const getEventById = async (id: string) => {
   const relatedEvents = await prisma.event.findMany({
     where: {
       category: event.category,
-      NOT: {id}
+      NOT: { id },
     },
   });
 
@@ -192,53 +198,90 @@ const getEventById = async (id: string) => {
   return { event, relatedEvents };
 };
 
+// Role based get events
 const myCreatedEvents = async (user: TAuthUser) => {
-  const email = user?.email;
   const userData = await prisma.user.findUnique({
-    where: { email },
+    where: {
+      email: user?.email,
+    },
   });
 
   if (!userData) {
     throw new AppError(StatusCodes.NOT_FOUND, "User not found");
   }
 
-  const events = await prisma.event.findMany();
-  if (!events) {
-    throw new AppError(StatusCodes.NOT_FOUND, "Event not found");
-  }
+  let events;
 
-  const myEvents = await prisma.event.findMany({
-    where: {
-      ownerId: userData.id,
-    },
-    include: {
-      participant: true,
-      review: {
-        include: {
-          user: {
-            select: {
-              name: true,
-              email: true,
-              photo: true,
+  if (
+    userData.role === UserRole.ADMIN ||
+    userData.role === UserRole.SUPER_ADMIN
+  ) {
+    // Admins see all events
+    events = await prisma.event.findMany({
+      include: {
+        participant: true,
+        review: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                email: true,
+                photo: true,
+              },
             },
           },
         },
-      },
-      owner: {
-        select: {
-          name: true,
-          email: true,
-          photo: true,
+        owner: {
+          select: {
+            name: true,
+            email: true,
+            photo: true,
+          },
         },
       },
-    },
-  });
-
-  if (myEvents.length === 0) {
-    throw new AppError(StatusCodes.NOT_FOUND, "No events created by this user");
+    });
+  } else if (userData.role === UserRole.USER) {
+    // Regular users see only their own events
+    events = await prisma.event.findMany({
+      where: {
+        ownerId: userData.id,
+      },
+      include: {
+        participant: true,
+        review: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                email: true,
+                photo: true,
+              },
+            },
+          },
+        },
+        owner: {
+          select: {
+            name: true,
+            email: true,
+            photo: true,
+          },
+        },
+      },
+    });
+  } else {
+    throw new AppError(StatusCodes.FORBIDDEN, "Unauthorized access");
   }
 
-  return myEvents;
+  if (!events || events.length === 0) {
+    throw new AppError(
+      StatusCodes.NOT_FOUND,
+      userData.role === UserRole.USER
+        ? "No events created by this user"
+        : "No event found"
+    );
+  }
+
+  return events;
 };
 
 const getEventCategoryCount = async () => {
@@ -323,7 +366,6 @@ const bannedEvent = async (id: string) => {
   return bannedEvent;
 };
 
-
 export const eventService = {
   createEvent,
   getAllEvents,
@@ -332,5 +374,5 @@ export const eventService = {
   getEventCategoryCount,
   updateSingleEvent,
   deleteSingleEvent,
-  bannedEvent
+  bannedEvent,
 };
