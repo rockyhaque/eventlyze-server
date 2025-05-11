@@ -330,11 +330,11 @@ const deleteSingleEvent = async (id: string) => {
     throw new AppError(StatusCodes.NOT_FOUND, "Event not found");
   }
 
-  await prisma.notification.deleteMany({
-    where: {
-      eventId: eventData.id,
-    },
-  });
+  // await prisma.notification.deleteMany({
+  //   where: {
+  //     eventId: eventData.id,
+  //   },
+  // });
 
   const event = await prisma.event.delete({
     where: { id },

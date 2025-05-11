@@ -83,7 +83,7 @@ model Notification {
   read      Boolean  @default(false)
   readUser  Boolean  @default(false)
   user      User     @relation(fields: [userId], references: [id])
-  event     Event    @relation(fields: [eventId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -96,7 +96,7 @@ model Participant {
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
 
-  event Event @relation(fields: [eventId], references: [id])
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
   user  User  @relation(fields: [userId], references: [id])
 
   @@map("participants")
@@ -122,7 +122,7 @@ model Payment {
   amount     Int
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
-  event      Event         @relation(fields: [eventId], references: [id])
+  event      Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
   user       User?         @relation(fields: [userId], references: [id])
 }
 
@@ -134,7 +134,7 @@ model Review {
   content String
   rating  Int
 
-  event Event @relation(fields: [eventId], references: [id])
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
   user  User  @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
