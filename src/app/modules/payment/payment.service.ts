@@ -226,14 +226,27 @@ const getSinglePayment = async (userId: string, eventId: string) => {
 };
 
 const paymentSuccess = async (tranId: string) => {
-  const result = await prisma.payment.update({
-    where: {
-      paymentId: tranId,
-    },
-    data: {
-      status: PaymentStatus.SUCCESS,
-    },
+  const result = await prisma.$transaction(async (tx) => {
+    const paymentStateChange = await tx.payment.update({
+      where: {
+        paymentId: tranId,
+      },
+      data: {
+        status: PaymentStatus.SUCCESS,
+      },
+    });
+
+    await prisma.participant.create({
+      data: {
+        eventId: paymentStateChange?.eventId,
+        userId: paymentStateChange?.userId!,
+        status: ParticipantStatus.REQUESTED,
+      },
+    });
+    return paymentStateChange;
   });
+
+
 
   if (result.status === PaymentStatus.SUCCESS) {
     return `${config.CLIENT_URL}/payments/success`;
