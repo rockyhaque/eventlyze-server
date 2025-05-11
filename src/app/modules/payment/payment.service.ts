@@ -41,12 +41,45 @@ const getAllPayments = async (user: TAuthUser) => {
     userData.role === UserRole.SUPER_ADMIN
   ) {
     // Admins see all payments
-    payments = await prisma.payment.findMany({});
+    payments = await prisma.payment.findMany({
+      include: {
+        event: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            photo: true,
+          },
+        },
+      },
+    });
   } else if (userData.role === UserRole.USER) {
     // Regular users see only their own payments
     payments = await prisma.payment.findMany({
       where: {
         userId: userData.id,
+      },
+      include: {
+        event: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            photo: true,
+          },
+        },
       },
     });
   } else {

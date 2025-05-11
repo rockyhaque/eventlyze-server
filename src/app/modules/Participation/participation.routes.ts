@@ -5,9 +5,10 @@ import { participationController } from "./participation.controller";
 const express = require("express");
 const router = express.Router();
 
+// TODO: Maybe no need. Refector later
 router.get(
   "/joined-event",
-  auth(UserRole.USER),
+  auth(UserRole.USER, UserRole.ADMIN, UserRole.SUPER_ADMIN),
   participationController.getJoinedEventsByUser
 );
 
@@ -18,9 +19,9 @@ router.get(
 );
 
 router.get(
-  "/joined-all-events",
-  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
-  participationController.getJoinedAllEventsByAdmin
+  "/all-participants",
+  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.USER),
+  participationController.getAllParticipations
 );
 
 router.post(
@@ -46,8 +47,5 @@ router.delete(
   auth(UserRole.USER),
   participationController.bannedParticipation
 );
-
-
-
 
 export const ParticipantRoutes = router;
