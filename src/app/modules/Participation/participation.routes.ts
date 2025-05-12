@@ -24,6 +24,12 @@ router.get(
   participationController.getAllParticipations
 );
 
+router.get(
+  "/host-participants",
+  auth(UserRole.USER),
+  participationController.getHostParticipations
+);
+
 router.post(
   "/join-event",
   auth(UserRole.USER),

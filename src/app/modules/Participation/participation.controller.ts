@@ -49,6 +49,23 @@ const getAllParticipations = catchAsync(
   }
 );
 
+const getHostParticipations = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const user = req.user;
+    const result = await participantService.getHostParticipations(
+      user as TAuthUser
+    );
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "All host participation fetched successfully",
+      data: result,
+    });
+  }
+);
+
+
+
 const createParticipantion = catchAsync(
   async (req: Request & { user?: TAuthUser }, res: Response) => {
     const user = req.user;
@@ -110,6 +127,7 @@ export const participationController = {
   getJoinedEventsByUser,
   getJoinedEventCategoryCount,
   getAllParticipations,
+  getHostParticipations,
   createParticipantion,
   cancelParticipation,
   bannedParticipation,
