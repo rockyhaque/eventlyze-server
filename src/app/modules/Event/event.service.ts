@@ -158,7 +158,17 @@ const getEventById = async (id: string) => {
   const event = await prisma.event.findUnique({
     where: { id },
     include: {
-      participant: true,
+      participant: {
+        include: {
+          user: {
+            select: {
+              name: true,
+              email: true,
+              photo: true,
+            },
+          },
+        },
+      },
       review: {
         include: {
           user: {
