@@ -118,7 +118,17 @@ const getAllEvents = async (params: any, options: any) => {
   const result = await prisma.event.findMany({
     where: whereConditions,
     include: {
-      participant: true,
+      participant: {
+        include: {
+          user: {
+            select: {
+              name: true,
+              email: true,
+              photo: true,
+            },
+          },
+        },
+      },
       review: {
         include: {
           user: {
@@ -200,10 +210,6 @@ const getEventById = async (id: string) => {
       NOT: { id },
     },
   });
-
-  if (!relatedEvents || relatedEvents.length === 0) {
-    throw new AppError(StatusCodes.NOT_FOUND, "Related Category not found");
-  }
 
   return { event, relatedEvents };
 };
