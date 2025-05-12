@@ -201,10 +201,6 @@ const getEventById = async (id: string) => {
     },
   });
 
-  if (!relatedEvents || relatedEvents.length === 0) {
-    throw new AppError(StatusCodes.NOT_FOUND, "Related Category not found");
-  }
-
   return { event, relatedEvents };
 };
 
