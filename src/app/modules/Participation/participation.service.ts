@@ -361,7 +361,7 @@ const participantStatusUpdate = async (id: string, req: any) => {
   if (participant.event.ownerId !== userData.id) {
     throw new AppError(
       StatusCodes.FORBIDDEN,
-      "Only the event creator can ban participants"
+      "Event creator can not be participant"
     );
   }
 
@@ -390,12 +390,7 @@ const participantStatusUpdate = async (id: string, req: any) => {
     },
   });
 
-  if (!updatedParticipant) {
-    throw new AppError(
-      StatusCodes.FORBIDDEN,
-      "Only the event creator can ban participants"
-    );
-  }
+
 
   return updatedParticipant;
 };
