@@ -1,9 +1,22 @@
-# Eventlyze – Backend
+# Eventlyze – Your Non-Stop Event Planning Platform
 
 A robust and scalable backend API for **Eventlyze - Event Planner & Participation System**, a secure event management platform enabling user authentication, event creation (public/private, free/paid), participant management, payment processing, reviews, and admin moderation. Designed with RESTful principles for modularity, performance, and scalability.
 
-📃 **Documentation**  
+**Live Link** ➡️ [https://eventlyze.vercel.app](https://eventlyze.vercel.app)
+
 **Server Link** ➡️ [https://eventlyze-server.vercel.app](https://eventlyze-server.vercel.app)
+
+## `Code Storm` Team  Members
+
+|  Name               | Student ID    | Email                                       |
+|---------------------|---------------|---------------------------------------------|
+|  Md Rashed Ali      | WEB8 - 3007   | tutorial.rashed@gmail.com                   |
+|  OMAR FARUK         | WEB9 - 2616   | faruk2059@gmail.com                         |
+|  Rasibul Islam      | WEB8 - 1136   | rasibul179@gmail.com                        |
+|  Md Nahiduzzaman    | WEB9 - 4276   | nahiduzzaman964@gmail.com                   |
+|  Md Sakib Al Hasan  | WEB4 - 2247   | mdsakibalhasanprogrammer1@gmail.com         |
+|  MD Sohel Rana      | WEB8 - 2867   | ranaot56@gmail.com                          |
+|  Rakibul Haq Roky   | WEB8 - 3916   | rockyhaque71@gmail.com                      |
 
 🛠 **Tech Stack**
 
@@ -109,14 +122,16 @@ A robust and scalable backend API for **Eventlyze - Event Planner & Participatio
    ```
    The server will run at `http://localhost:5000`.
 
+  <br>
+
 📋 **Additional Notes**
 
 - **Database**: Ensure PostgreSQL is installed and running locally. Create a database named `event_planner` and update the `DATABASE_URL` in `.env` with your credentials.
+
 - **Testing**: Use the provided admin credentials for testing:
   - **Email**: admin@eventplanner.com
   - **Password**: Admin123!
 - **Deployment**: Deployed on Vercel. Configure environment variables in the hosting platform’s dashboard.
-- **API Documentation**: Explore endpoints and schemas at `http://localhost:5000/api-docs` in development mode.
 
 📬 **Contact**  
-For issues or inquiries, reach out to [rockyhaque99@gmail.com](mailto:rockyhaque99@gmail.com). Thank you.
+For issues or inquiries, reach out to [Team Eventlyze](mailto:rockyhaque71@gmail.com). Thank you 💜
