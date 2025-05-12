@@ -103,16 +103,16 @@ const getAllParticipations = async (user: TAuthUser) => {
         event: {
           select: {
             title: true,
-            category: true
-          }
+            category: true,
+          },
         },
         user: {
           select: {
             name: true,
             email: true,
-            photo: true
-          }
-        }
+            photo: true,
+          },
+        },
       },
     });
   } else {
@@ -361,22 +361,27 @@ const participantStatusUpdate = async (id: string, req: any) => {
   if (participant.event.ownerId !== userData.id) {
     throw new AppError(
       StatusCodes.FORBIDDEN,
-      "Event creator can not be participant"
+      "Event creator can not be a participant"
     );
   }
 
-  const paymentData = await prisma.payment.findFirst({
-    where: {
-      userId: participant.userId,
-      status: PaymentStatus.COMPLETED,
-    },
-  });
+  if (participant?.event?.isPaid) {
+    const paymentData = await prisma.payment.findFirst({
+      where: {
+        userId: participant.userId,
+        eventId: participant?.event?.id,
+        status: {
+          in: [PaymentStatus.SUCCESS, PaymentStatus.COMPLETED],
+        },
+      },
+    });
 
-  if (!paymentData) {
-    throw new AppError(
-      StatusCodes.FORBIDDEN,
-      "You didn't complete your payment"
-    );
+    if (!paymentData) {
+      throw new AppError(
+        StatusCodes.FORBIDDEN,
+        "You didn't complete your payment"
+      );
+    }
   }
 
   // Update the participant's status to BANNED
@@ -389,8 +394,6 @@ const participantStatusUpdate = async (id: string, req: any) => {
       status: payload.status,
     },
   });
-
-
 
   return updatedParticipant;
 };
