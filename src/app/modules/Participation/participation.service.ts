@@ -69,7 +69,7 @@ const getJoinedEventCategoryCount = async () => {
   return categoryCounts;
 };
 
-// Role based get Participations
+// Role based get Participations for admin & Attendees
 const getAllParticipations = async (user: TAuthUser) => {
   const userData = await prisma.user.findUnique({
     where: {
@@ -124,6 +124,53 @@ const getAllParticipations = async (user: TAuthUser) => {
   }
 
   return participants;
+};
+
+const getHostParticipations = async (user: TAuthUser) => {
+  const userData = await prisma.user.findUnique({
+    where: {
+      email: user?.email,
+    },
+  });
+
+  if (!userData) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
+
+  const eventData = await prisma.event.findMany({
+    where: {
+      ownerId: userData?.id,
+    },
+  });
+
+  if (!eventData) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Event not found");
+  }
+
+  // array of event id
+  const eventIds = eventData.map((event) => event.id);
+
+  console.log("eventIds", eventIds);
+
+  const participationData = await prisma.participant.findMany({
+    where: {
+      eventId: {
+        in: eventIds,
+      },
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          photo: true,
+          email: true,
+        },
+      },
+    },
+  });
+
+  return participationData;
 };
 
 const createParticipation = async (payload: any, user: any) => {
@@ -401,6 +448,7 @@ const participantStatusUpdate = async (id: string, req: any) => {
 export const participantService = {
   getJoinedEventsByUser,
   getAllParticipations,
+  getHostParticipations,
   getJoinedEventCategoryCount,
   createParticipation,
   cancelParticipation,
