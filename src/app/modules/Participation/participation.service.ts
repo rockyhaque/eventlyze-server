@@ -365,13 +365,14 @@ const participantStatusUpdate = async (id: string, req: any) => {
     );
   }
 
-  // console.log(participant?.event);
-
   if (participant?.event?.isPaid) {
     const paymentData = await prisma.payment.findFirst({
       where: {
         userId: participant.userId,
-        status: PaymentStatus.COMPLETED,
+        eventId: participant?.event?.id,
+        status: {
+          in: [PaymentStatus.SUCCESS, PaymentStatus.COMPLETED],
+        },
       },
     });
 
