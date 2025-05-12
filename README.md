@@ -6,17 +6,20 @@ A robust and scalable backend API for **Eventlyze - Event Planner & Participatio
 
 **Server Link** ➡️ [https://eventlyze-server.vercel.app](https://eventlyze-server.vercel.app)
 
+**Client Repository** ➡️ [https://github.com/rockyhaque/eventlyze-client](https://github.com/rockyhaque/eventlyze-client)
+
+
 ## `Code Storm` Team  Members
 
-|  Name               | Student ID    | Email                                       |
-|---------------------|---------------|---------------------------------------------|
-|  Md Rashed Ali      | WEB8 - 3007   | tutorial.rashed@gmail.com                   |
-|  OMAR FARUK         | WEB9 - 2616   | faruk2059@gmail.com                         |
-|  Rasibul Islam      | WEB8 - 1136   | rasibul179@gmail.com                        |
-|  Md Nahiduzzaman    | WEB9 - 4276   | nahiduzzaman964@gmail.com                   |
-|  Md Sakib Al Hasan  | WEB4 - 2247   | mdsakibalhasanprogrammer1@gmail.com         |
-|  MD Sohel Rana      | WEB8 - 2867   | ranaot56@gmail.com                          |
-|  Rakibul Haq Roky   | WEB8 - 3916   | rockyhaque71@gmail.com                      |
+| 💼 Name              | 🆔 Student ID   | 📧 Email                                     |
+|----------------------|----------------|----------------------------------------------|
+| Md Rashed Ali        | `WEB8 - 3007`  | [tutorial.rashed@gmail.com](mailto:tutorial.rashed@gmail.com) |
+| OMAR FARUK           | `WEB9 - 2616`  | [faruk2059@gmail.com](mailto:faruk2059@gmail.com) |
+| Rasibul Islam        | `WEB8 - 1136`  | [rasibul179@gmail.com](mailto:rasibul179@gmail.com) |
+| Md Nahiduzzaman      | `WEB9 - 4276`  | [nahiduzzaman964@gmail.com](mailto:nahiduzzaman964@gmail.com) |
+| Md Sakib Al Hasan    | `WEB4 - 2247`  | [mdsakibalhasanprogrammer1@gmail.com](mailto:mdsakibalhasanprogrammer1@gmail.com) |
+| MD Sohel Rana        | `WEB8 - 2867`  | [ranaot56@gmail.com](mailto:ranaot56@gmail.com) |
+| Rakibul Haq Roky     | `WEB8 - 3916`  | [rockyhaque71@gmail.com](mailto:rockyhaque71@gmail.com) |                     |
 
 🛠 **Tech Stack**
 
@@ -86,7 +89,7 @@ A robust and scalable backend API for **Eventlyze - Event Planner & Participatio
 1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/rockyhaque/eventlyze-server
+   git clone https://github.com/rockyhaque/eventlyze-server.git
    cd eventlyze-server
    ```
 
