@@ -150,7 +150,6 @@ const getHostParticipations = async (user: TAuthUser) => {
   // array of event id
   const eventIds = eventData.map((event) => event.id);
 
-  console.log("eventIds", eventIds);
 
   const participationData = await prisma.participant.findMany({
     where: {
@@ -165,6 +164,13 @@ const getHostParticipations = async (user: TAuthUser) => {
           name: true,
           photo: true,
           email: true,
+        },
+      },
+      event: {
+        select: {
+          id: true,
+          title: true,
+          category: true,
         },
       },
     },
